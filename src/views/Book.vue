@@ -10,15 +10,12 @@
           <div class="p-field">
             <span class="p-input-icon-right">
               <i class="pi pi-phone" />
-              <InputMask
+              <InputText
                 id="identifier"
                 v-model="v$.identifier.$model"
-                :autoClear="false"
                 :class="{
                   'p-invalid': v$.identifier.$invalid && v$.identifier.$dirty,
                 }"
-                mask="999-999-999"
-                :modelValue="v$.identifier.$model"
                 type="text"
               />
             </span>
@@ -90,7 +87,7 @@
 
 <script>
 import { onMounted, reactive, ref } from "vue";
-import { required } from "@vuelidate/validators";
+import { maxLength, minLength, required } from "@vuelidate/validators";
 import { useStore } from "vuex";
 import { useVuelidate } from "@vuelidate/core";
 import dayjs from "dayjs";
@@ -101,7 +98,11 @@ export default {
 
     const rules = {
       day: { required },
-      identifier: { required },
+      identifier: {
+        maxLength: maxLength(9),
+        minLength: minLength(9),
+        required,
+      },
       slot: { required },
     };
     const state = reactive({
