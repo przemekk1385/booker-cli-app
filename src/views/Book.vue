@@ -53,7 +53,7 @@
               optionDisabled="apartment"
               optionLabel="label"
               optionValue="value"
-              :options="slots"
+              :options="daysSlots"
               placeholder="Choose slot"
             >
               <template #option="slotProps">
@@ -86,11 +86,13 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { maxLength, minLength, required } from "@vuelidate/validators";
 import { useStore } from "vuex";
 import { useVuelidate } from "@vuelidate/core";
 import dayjs from "dayjs";
+
+const DATE_FORMAT = "YYYY-MM-DD";
 
 export default {
   setup() {
@@ -124,10 +126,11 @@ export default {
       let { day } = state;
       const { identifier, slot } = state;
       const data = await store.dispatch("bookingCreate", {
-        day: dayjs(day).format("YYYY-MM-DD"),
+        day: dayjs(day).format(DATE_FORMAT),
         identifier,
         slot,
       });
+      bookings.value.push(data);
 
       const { errors } = data;
       if (errors) {
@@ -147,6 +150,22 @@ export default {
     });
 
     const slots = ref([]);
+    const bookings = ref([]);
+
+    const daysSlots = computed(() =>
+      slots.value.map(({ label, value }) => ({
+        label,
+        value,
+        apartment: daysBookings.value[value],
+      }))
+    );
+    const daysBookings = computed(() =>
+      bookings.value
+        .filter(({ day }) => {
+          return day === dayjs(state.day).format(DATE_FORMAT);
+        })
+        .reduce((ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }), {})
+    );
 
     onMounted(async () => {
       const maxDate = (() => store.state.maxDate)();
@@ -157,18 +176,10 @@ export default {
       calendar.minDate = minDate.toDate();
 
       const bookingListPromise = await (() => store.dispatch("bookingList"))();
-      const bookings = bookingListPromise.reduce(
-        (ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }),
-        {}
-      );
+      bookings.value = bookingListPromise;
 
       const slotListPromise = await (() => store.dispatch("slotList"))();
-
-      slots.value = slotListPromise.map(({ label, value }) => ({
-        label,
-        value,
-        apartment: bookings[value],
-      }));
+      slots.value = slotListPromise;
     });
 
     return {
@@ -177,7 +188,7 @@ export default {
       handleSubmit,
       handleReset,
       calendar,
-      slots,
+      daysSlots,
     };
   },
 };
