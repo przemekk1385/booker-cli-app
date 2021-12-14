@@ -8,9 +8,7 @@ import PrimeVue from "primevue/config";
 import Button from "primevue/button";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
-import InputMask from "primevue/inputmask";
-import Listbox from "primevue/listbox";
-import RadioButton from "primevue/radiobutton";
+import InputText from "primevue/inputtext";
 import Tag from "primevue/tag";
 
 import Ripple from "primevue/ripple";
@@ -27,9 +25,7 @@ app.use(store).use(router).use(PrimeVue, { ripple: true });
 app.component("Button", Button);
 app.component("Calendar", Calendar);
 app.component("Dropdown", Dropdown);
-app.component("InputMask", InputMask);
-app.component("Listbox", Listbox);
-app.component("RadioButton", RadioButton);
+app.component("InputText", InputText);
 app.component("Tag", Tag);
 
 app.directive("ripple", Ripple);
