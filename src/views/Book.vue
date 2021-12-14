@@ -86,10 +86,11 @@
 </template>
 
 <script>
+import { ToastSeverity } from "primevue/api";
 import { computed, onMounted, reactive, ref } from "vue";
-import { maxLength, minLength, required } from "@vuelidate/validators";
 import { useStore } from "vuex";
 import { useVuelidate } from "@vuelidate/core";
+import { maxLength, minLength, required } from "@vuelidate/validators";
 import dayjs from "dayjs";
 
 const DATE_FORMAT = "YYYY-MM-DD";
@@ -135,6 +136,20 @@ export default {
       const { errors } = data;
       if (errors) {
         Object.assign($externalResults, errors);
+        store.commit("addToastMessage", {
+          severity: ToastSeverity.INFO,
+          summary: "Info",
+          detail: "Check form fields.",
+          life: 3000,
+        });
+      } else {
+        store.commit("addToastMessage", {
+          severity: ToastSeverity.SUCCESS,
+          summary: "Ok",
+          detail: "Booking created.",
+          life: 3000,
+        });
+        handleReset();
       }
     };
     const handleReset = () => {
