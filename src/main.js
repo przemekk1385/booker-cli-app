@@ -17,16 +17,22 @@ import "primevue/resources/themes/lara-dark-indigo/theme.css";
 import "primevue/resources/primevue.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
+import Toast from "primevue/toast";
+import ToastService from "primevue/toastservice";
 
 const app = createApp(App);
 
-app.use(store).use(router).use(PrimeVue, { ripple: true });
+app.use(store);
+app.use(router);
+app.use(PrimeVue, { ripple: true });
+app.use(ToastService);
 
 app.component("Button", Button);
 app.component("Calendar", Calendar);
 app.component("Dropdown", Dropdown);
 app.component("InputText", InputText);
 app.component("Tag", Tag);
+app.component("Toast", Toast);
 
 app.directive("ripple", Ripple);
 

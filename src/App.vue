@@ -1,6 +1,32 @@
 <template>
-  <router-view />
+  <div>
+    <Toast position="bottom-center" />
+    <router-view />
+    {{ latestMessage }}
+  </div>
 </template>
+
+<script>
+import { useToast } from "primevue/usetoast";
+import { computed, watch } from "vue";
+import { useStore } from "vuex";
+
+export default {
+  setup() {
+    const store = useStore();
+    const toast = useToast();
+
+    const latestMessage = computed(() => store.getters.latestMessage);
+
+    watch(
+      () => latestMessage.value,
+      (message) => {
+        toast.add(message);
+      }
+    );
+  },
+};
+</script>
 
 <style>
 body {

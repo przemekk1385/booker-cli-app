@@ -1,16 +1,21 @@
+import { ToastSeverity } from "primevue/api";
 import { createStore } from "vuex";
 import axios from "axios";
 import dayjs from "dayjs";
 
 export default createStore({
   state: {
-    errorMessage: undefined,
     minDate: dayjs(),
     maxDate: dayjs().add(1, "day"),
+    toastMessages: [],
+  },
+  getters: {
+    latestMessage: ({ toastMessages }) =>
+      toastMessages[toastMessages.length - 1],
   },
   mutations: {
-    errorMessage(state, message) {
-      state.errorMessage = message;
+    addToastMessage(state, toastMessage) {
+      state.toastMessages.push(toastMessage);
     },
   },
   actions: {
@@ -22,10 +27,11 @@ export default createStore({
         const { data } = dataPromise;
         return data;
       } catch ({ response: { data, status } }) {
-        commit(
-          "errorMessage",
-          `Failed to get slots, got ${status} response code.`
-        );
+        commit("addToastMessage", {
+          severity: ToastSeverity.ERROR,
+          summary: "Error",
+          detail: `Failed to get slots, got ${status} response code.`,
+        });
         return [];
       }
     },
@@ -42,8 +48,16 @@ export default createStore({
         const { data } = dataPromise;
         return data;
       } catch ({ response: { data, status } }) {
-        commit("errorMessage", `Failed to book, got ${status} response code.`);
-        return { errors: data };
+        if (status !== 400) {
+          commit("addToastMessage", {
+            severity: ToastSeverity.ERROR,
+            summary: "Error",
+            detail: `Failed to book, got ${status} response code.`,
+          });
+          return {};
+        } else {
+          return { errors: data };
+        }
       }
     },
     async bookingList({ commit }) {
@@ -54,10 +68,11 @@ export default createStore({
         const { data } = dataPromise;
         return data;
       } catch ({ response: { data, status } }) {
-        commit(
-          "errorMessage",
-          `Failed to get bookings, got ${status} response code.`
-        );
+        commit("addToastMessage", {
+          severity: ToastSeverity.ERROR,
+          summary: "Error",
+          detail: `Failed to get bookings, got ${status} response code.`,
+        });
         return [];
       }
     },
