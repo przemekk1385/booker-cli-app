@@ -2,7 +2,6 @@
   <div>
     <Toast position="bottom-center" />
     <router-view />
-    {{ latestMessage }}
   </div>
 </template>
 
