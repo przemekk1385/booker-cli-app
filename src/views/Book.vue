@@ -146,22 +146,20 @@ export default {
 
     const isSyncing = computed(() => store.getters.appIsSyncing);
 
-    const slots = computed(() => store.state.slots || []);
-    const daysSlots = computed(() =>
-      slots.value.map(({ label, value }) => ({
-        label,
-        value,
-        apartment: daysBookings.value[value],
-      }))
-    );
-
-    const bookings = computed(() => store.state.bookings || []);
     const daysBookings = computed(() =>
-      bookings.value
+      (store.state.bookings || [])
         .filter(({ day }) => {
           return day === dayjs(state.day).format(DATE_FORMAT);
         })
         .reduce((ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }), {})
+    );
+
+    const daysSlots = computed(() =>
+      (store.state.slots || []).map(({ label, value }) => ({
+        label,
+        value,
+        apartment: daysBookings.value[value],
+      }))
     );
 
     const formErrors = computed(() => store.getters.latestFormErrors);
