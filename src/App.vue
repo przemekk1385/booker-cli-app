@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-100 p-d-flex p-flex-column p-jc-between">
     <Toast position="bottom-center" />
     <router-view />
   </div>
@@ -30,12 +30,16 @@ export default {
 <style>
 body {
   margin: 0;
-  height: 100%;
+  height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
   background-color: var(--surface-a);
   font-family: var(--font-family);
   font-weight: 400;
   color: var(--text-color);
+}
+
+.h-100 {
+  height: 100%;
 }
 </style>
