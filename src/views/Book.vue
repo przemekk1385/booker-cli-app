@@ -50,6 +50,7 @@
               inputId="slot"
               v-model="v$.slot.$model"
               :class="{ 'p-invalid': v$.slot.$invalid && v$.slot.$dirty }"
+              :loading="isSyncing"
               optionDisabled="apartment"
               optionLabel="label"
               optionValue="value"
@@ -143,16 +144,20 @@ export default {
       minDate: undefined,
     });
 
+    const isSyncing = computed(() => store.getters.appIsSyncing);
+
+    const slots = computed(() => store.state.slots || []);
     const daysSlots = computed(() =>
-      store.state.slots.map(({ label, value }) => ({
+      slots.value.map(({ label, value }) => ({
         label,
         value,
         apartment: daysBookings.value[value],
       }))
     );
 
+    const bookings = computed(() => store.state.bookings || []);
     const daysBookings = computed(() =>
-      store.state.bookings
+      bookings.value
         .filter(({ day }) => {
           return day === dayjs(state.day).format(DATE_FORMAT);
         })
@@ -183,6 +188,7 @@ export default {
       handleSubmit,
       handleReset,
       calendar,
+      isSyncing,
       daysSlots,
     };
   },

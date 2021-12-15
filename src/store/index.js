@@ -12,11 +12,14 @@ export default createStore({
     toastMessages: [],
     healthStatus: undefined,
 
-    bookings: [],
-    slots: [],
+    bookings: undefined,
+    slots: undefined,
+
+    loadingSlots: true,
   },
   getters: {
     apiIsOnline: ({ healthStatus }) => healthStatus === 200,
+    appIsSyncing: ({ bookings, slots }) => !bookings || !slots,
     latestFormErrors: ({ formErrors }) => formErrors[formErrors.length - 1],
     latestToastMessage: ({ toastMessages }) =>
       toastMessages[toastMessages.length - 1],
@@ -35,8 +38,15 @@ export default createStore({
     addBooking(state, item) {
       state.bookings.push(item);
     },
-    addSlot(state, item) {
-      state.slots.push(item);
+    clearBookings(state) {
+      state.bookings = undefined;
+    },
+    setBookings(state, bookings) {
+      state.bookings = bookings;
+    },
+
+    setSlots(state, slots) {
+      state.slots = slots;
     },
   },
   actions: {
@@ -56,16 +66,16 @@ export default createStore({
         const dataPromise = await axios.get(
           `${process.env.VUE_APP_API_HOST}/api/v1/slot/`
         );
-        const { data } = dataPromise;
-        data.forEach((item) => {
-          commit("addSlot", item);
-        });
-      } catch ({ response: { data, status } }) {
-        commit("addToastMessage", {
-          severity: ToastSeverity.ERROR,
-          summary: "Error",
-          detail: `Failed to get slots, got ${status} response code.`,
-        });
+        const { data: slots } = dataPromise;
+        commit("setSlots", slots);
+      } catch ({ response: { data, status } = {} }) {
+        if (status) {
+          commit("addToastMessage", {
+            severity: ToastSeverity.ERROR,
+            summary: "Error",
+            detail: `Failed to get slots, got ${status} response code.`,
+          });
+        }
       }
     },
     async bookingCreate({ commit }, { day, identifier, slot }) {
@@ -86,7 +96,7 @@ export default createStore({
           detail: `Booking created.`,
           life: 3000,
         });
-      } catch ({ response: { data: errors, status } }) {
+      } catch ({ response: { data: errors, status } = {} }) {
         if (status === 400) {
           commit("addFormErrors", errors);
           commit("addToastMessage", {
@@ -95,7 +105,7 @@ export default createStore({
             detail: `Check form fields.`,
             life: 3000,
           });
-        } else {
+        } else if (status) {
           commit("addToastMessage", {
             severity: ToastSeverity.ERROR,
             summary: "Error",
@@ -105,20 +115,21 @@ export default createStore({
       }
     },
     async bookingList({ commit }) {
+      commit("clearBookings");
       try {
         const dataPromise = await axios.get(
           `${process.env.VUE_APP_API_HOST}/api/v1/booking/`
         );
-        const { data } = dataPromise;
-        data.forEach((item) => {
-          commit("addBooking", item);
-        });
-      } catch ({ response: { data, status } }) {
-        commit("addToastMessage", {
-          severity: ToastSeverity.ERROR,
-          summary: "Error",
-          detail: `Failed to get bookings, got ${status} response code.`,
-        });
+        const { data: bookings } = dataPromise;
+        commit("setBookings", bookings);
+      } catch ({ response: { data, status } = {} }) {
+        if (status) {
+          commit("addToastMessage", {
+            severity: ToastSeverity.ERROR,
+            summary: "Error",
+            detail: `Failed to get bookings, got ${status} response code.`,
+          });
+        }
       }
     },
   },
