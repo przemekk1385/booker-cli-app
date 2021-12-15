@@ -86,8 +86,7 @@
 </template>
 
 <script>
-import { ToastSeverity } from "primevue/api";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, watch } from "vue";
 import { useStore } from "vuex";
 import { useVuelidate } from "@vuelidate/core";
 import { maxLength, minLength, required } from "@vuelidate/validators";
@@ -126,31 +125,11 @@ export default {
 
       let { day } = state;
       const { identifier, slot } = state;
-      const data = await store.dispatch("bookingCreate", {
+      store.dispatch("bookingCreate", {
         day: dayjs(day).format(DATE_FORMAT),
         identifier,
         slot,
       });
-      bookings.value.push(data);
-
-      const { errors } = data;
-      if (errors) {
-        Object.assign($externalResults, errors);
-        store.commit("addToastMessage", {
-          severity: ToastSeverity.INFO,
-          summary: "Info",
-          detail: "Check form fields.",
-          life: 3000,
-        });
-      } else {
-        store.commit("addToastMessage", {
-          severity: ToastSeverity.SUCCESS,
-          summary: "Ok",
-          detail: "Booking created.",
-          life: 3000,
-        });
-        handleReset();
-      }
     };
     const handleReset = () => {
       state.day = undefined;
@@ -164,22 +143,26 @@ export default {
       minDate: undefined,
     });
 
-    const slots = ref([]);
-    const bookings = ref([]);
-
     const daysSlots = computed(() =>
-      slots.value.map(({ label, value }) => ({
+      store.state.slots.map(({ label, value }) => ({
         label,
         value,
         apartment: daysBookings.value[value],
       }))
     );
+
     const daysBookings = computed(() =>
-      bookings.value
+      store.state.bookings
         .filter(({ day }) => {
           return day === dayjs(state.day).format(DATE_FORMAT);
         })
         .reduce((ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }), {})
+    );
+
+    const formErrors = computed(() => store.getters.latestFormErrors);
+    watch(
+      () => formErrors.value,
+      (errors) => Object.assign($externalResults, errors)
     );
 
     onMounted(async () => {
@@ -190,11 +173,8 @@ export default {
       calendar.maxDate = maxDate.toDate();
       calendar.minDate = minDate.toDate();
 
-      const bookingListPromise = await (() => store.dispatch("bookingList"))();
-      bookings.value = bookingListPromise;
-
-      const slotListPromise = await (() => store.dispatch("slotList"))();
-      slots.value = slotListPromise;
+      store.dispatch("bookingList");
+      store.dispatch("slotList");
     });
 
     return {
