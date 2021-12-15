@@ -2,12 +2,19 @@
   <div class="h-100 p-d-flex p-flex-column p-jc-between">
     <Toast position="bottom-center" />
     <router-view />
+    <div class="p-as-bottom p-grid">
+      <div class="p-col">
+        <i class="pi pi-info-circle"></i>
+        {{ healthStatus === 200 ? "Online" : "Offline" }}
+      </div>
+      <div class="p-col"><i class="pi pi-mobile"></i> +48 111-222-333</div>
+    </div>
   </div>
 </template>
 
 <script>
 import { useToast } from "primevue/usetoast";
-import { computed, watch } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 
 export default {
@@ -16,6 +23,7 @@ export default {
     const toast = useToast();
 
     const latestToastMessage = computed(() => store.getters.latestToastMessage);
+    const healthStatus = computed(() => store.state.healthStatus);
 
     watch(
       () => latestToastMessage.value,
@@ -23,6 +31,10 @@ export default {
         toast.add(message);
       }
     );
+
+    onMounted(() => store.dispatch("getHealthStatus"));
+
+    return { healthStatus };
   },
 };
 </script>

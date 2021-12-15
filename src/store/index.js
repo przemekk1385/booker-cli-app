@@ -10,11 +10,13 @@ export default createStore({
 
     formErrors: [],
     toastMessages: [],
+    healthStatus: undefined,
 
     bookings: [],
     slots: [],
   },
   getters: {
+    apiIsOnline: ({ healthStatus }) => healthStatus === 200,
     latestFormErrors: ({ formErrors }) => formErrors[formErrors.length - 1],
     latestToastMessage: ({ toastMessages }) =>
       toastMessages[toastMessages.length - 1],
@@ -26,6 +28,10 @@ export default createStore({
     addFormErrors(state, errors) {
       state.formErrors.push(errors);
     },
+    setHealthStatus(state, status) {
+      state.healthStatus = status;
+    },
+
     addBooking(state, item) {
       state.bookings.push(item);
     },
@@ -34,6 +40,17 @@ export default createStore({
     },
   },
   actions: {
+    async getHealthStatus({ commit }) {
+      try {
+        const dataPromise = await axios.get(
+          `${process.env.VUE_APP_API_HOST}/api/v1/health/`
+        );
+        const { status } = dataPromise;
+        commit("setHealthStatus", status);
+      } catch {
+        commit("setHealthStatus", undefined);
+      }
+    },
     async slotList({ commit }) {
       try {
         const dataPromise = await axios.get(
