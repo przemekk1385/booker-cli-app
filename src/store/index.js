@@ -7,15 +7,30 @@ export default createStore({
   state: {
     minDate: dayjs(),
     maxDate: dayjs().add(1, "day"),
+
+    formErrors: [],
     toastMessages: [],
+
+    bookings: [],
+    slots: [],
   },
   getters: {
-    latestMessage: ({ toastMessages }) =>
+    latestFormErrors: ({ formErrors }) => formErrors[formErrors.length - 1],
+    latestToastMessage: ({ toastMessages }) =>
       toastMessages[toastMessages.length - 1],
   },
   mutations: {
     addToastMessage(state, toastMessage) {
       state.toastMessages.push(toastMessage);
+    },
+    addFormErrors(state, errors) {
+      state.formErrors.push(errors);
+    },
+    addBooking(state, item) {
+      state.bookings.push(item);
+    },
+    addSlot(state, item) {
+      state.slots.push(item);
     },
   },
   actions: {
@@ -25,14 +40,15 @@ export default createStore({
           `${process.env.VUE_APP_API_HOST}/api/v1/slot/`
         );
         const { data } = dataPromise;
-        return data;
+        data.forEach((item) => {
+          commit("addSlot", item);
+        });
       } catch ({ response: { data, status } }) {
         commit("addToastMessage", {
           severity: ToastSeverity.ERROR,
           summary: "Error",
           detail: `Failed to get slots, got ${status} response code.`,
         });
-        return [];
       }
     },
     async bookingCreate({ commit }, { day, identifier, slot }) {
@@ -45,18 +61,29 @@ export default createStore({
             slot,
           }
         );
-        const { data } = dataPromise;
-        return data;
-      } catch ({ response: { data, status } }) {
-        if (status !== 400) {
+        const { data: item } = dataPromise;
+        commit("addBooking", item);
+        commit("addToastMessage", {
+          severity: ToastSeverity.SUCCESS,
+          summary: "Ok",
+          detail: `Booking created.`,
+          life: 3000,
+        });
+      } catch ({ response: { data: errors, status } }) {
+        if (status === 400) {
+          commit("addFormErrors", errors);
+          commit("addToastMessage", {
+            severity: ToastSeverity.INFO,
+            summary: "Info",
+            detail: `Check form fields.`,
+            life: 3000,
+          });
+        } else {
           commit("addToastMessage", {
             severity: ToastSeverity.ERROR,
             summary: "Error",
             detail: `Failed to book, got ${status} response code.`,
           });
-          return {};
-        } else {
-          return { errors: data };
         }
       }
     },
@@ -66,14 +93,15 @@ export default createStore({
           `${process.env.VUE_APP_API_HOST}/api/v1/booking/`
         );
         const { data } = dataPromise;
-        return data;
+        data.forEach((item) => {
+          commit("addBooking", item);
+        });
       } catch ({ response: { data, status } }) {
         commit("addToastMessage", {
           severity: ToastSeverity.ERROR,
           summary: "Error",
           detail: `Failed to get bookings, got ${status} response code.`,
         });
-        return [];
       }
     },
   },

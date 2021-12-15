@@ -16,10 +16,10 @@ export default {
     const store = useStore();
     const toast = useToast();
 
-    const latestMessage = computed(() => store.getters.latestMessage);
+    const latestToastMessage = computed(() => store.getters.latestToastMessage);
 
     watch(
-      () => latestMessage.value,
+      () => latestToastMessage.value,
       (message) => {
         toast.add(message);
       }
