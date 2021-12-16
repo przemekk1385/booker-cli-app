@@ -5,7 +5,7 @@
     <div class="p-as-bottom p-grid">
       <div class="p-col">
         <i class="pi pi-info-circle"></i>
-        {{ healthStatus === 200 ? "Online" : "Offline" }}
+        {{ isApiOnline ? "Online" : "Offline" }}
       </div>
       <div class="p-col"><i class="pi pi-mobile"></i> +48 111-222-333</div>
     </div>
@@ -22,19 +22,19 @@ export default {
     const store = useStore();
     const toast = useToast();
 
-    const latestToastMessage = computed(() => store.getters.latestToastMessage);
-    const healthStatus = computed(() => store.state.healthStatus);
+    const latestMessage = computed(() => store.getters.latestMessage);
+    const isApiOnline = computed(() => store.getters.isApiOnline);
 
     watch(
-      () => latestToastMessage.value,
+      () => latestMessage.value,
       (message) => {
         toast.add(message);
       }
     );
 
-    onMounted(() => store.dispatch("getHealthStatus"));
+    onMounted(async () => await store.dispatch("getHealthStatus"));
 
-    return { healthStatus };
+    return { isApiOnline };
   },
 };
 </script>

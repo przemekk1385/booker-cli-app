@@ -50,7 +50,7 @@
               inputId="slot"
               v-model="v$.slot.$model"
               :class="{ 'p-invalid': v$.slot.$invalid && v$.slot.$dirty }"
-              :loading="isSyncing"
+              :loading="isAppSyncing"
               optionDisabled="apartment"
               optionLabel="label"
               optionValue="value"
@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import { computed, onMounted, reactive, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { useVuelidate } from "@vuelidate/core";
 import { maxLength, minLength, required } from "@vuelidate/validators";
@@ -98,6 +98,8 @@ const DATE_FORMAT = "YYYY-MM-DD";
 export default {
   setup() {
     const store = useStore();
+
+    const isAppSyncing = computed(() => store.getters.isAppSyncing);
 
     const rules = {
       day: { required },
@@ -144,8 +146,7 @@ export default {
       minDate: undefined,
     });
 
-    const isSyncing = computed(() => store.getters.appIsSyncing);
-
+    const daysSlots = ref([]);
     const daysBookings = computed(() =>
       (store.state.bookings || [])
         .filter(({ day }) => {
@@ -154,12 +155,15 @@ export default {
         .reduce((ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }), {})
     );
 
-    const daysSlots = computed(() =>
-      (store.state.slots || []).map(({ label, value }) => ({
-        label,
-        value,
-        apartment: daysBookings.value[value],
-      }))
+    watch(
+      () => daysBookings.value,
+      () => {
+        daysSlots.value = (store.state.slots || []).map(({ label, value }) => ({
+          label,
+          value,
+          apartment: daysBookings.value[value],
+        }));
+      }
     );
 
     const formErrors = computed(() => store.getters.latestFormErrors);
@@ -176,8 +180,10 @@ export default {
       calendar.maxDate = maxDate.toDate();
       calendar.minDate = minDate.toDate();
 
-      store.dispatch("bookingList");
-      store.dispatch("slotList");
+      await Promise.all([
+        store.dispatch("bookingList"),
+        store.dispatch("slotList"),
+      ]);
     });
 
     return {
@@ -186,7 +192,7 @@ export default {
       handleSubmit,
       handleReset,
       calendar,
-      isSyncing,
+      isAppSyncing,
       daysSlots,
     };
   },
