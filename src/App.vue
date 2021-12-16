@@ -14,13 +14,15 @@
 
 <script>
 import { useToast } from "primevue/usetoast";
-import { computed, onMounted, watch } from "vue";
+import { computed, watch } from "vue";
 import { useStore } from "vuex";
 
 export default {
   setup() {
     const store = useStore();
     const toast = useToast();
+
+    const initialize = async () => await store.dispatch("initialize");
 
     const latestMessage = computed(() => store.getters.latestMessage);
     const isApiOnline = computed(() => store.getters.isApiOnline);
@@ -32,8 +34,7 @@ export default {
       }
     );
 
-    onMounted(async () => await store.dispatch("getHealthStatus"));
-
+    initialize();
     return { isApiOnline };
   },
 };
