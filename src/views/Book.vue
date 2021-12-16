@@ -147,22 +147,23 @@ export default {
     });
 
     const daysSlots = ref([]);
-    const daysBookings = computed(() =>
-      (store.state.bookings || [])
-        .filter(({ day }) => {
-          return day === dayjs(state.day).format(DATE_FORMAT);
-        })
-        .reduce((ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }), {})
-    );
-
+    const daysBookings = ref([]);
     watch(
-      () => daysBookings.value,
-      () => {
-        daysSlots.value = (store.state.slots || []).map(({ label, value }) => ({
-          label,
-          value,
-          apartment: daysBookings.value[value],
-        }));
+      () => isAppSyncing.value,
+      (val) => {
+        if (!val) {
+          daysBookings.value = store.state.bookings
+            .filter(({ day }) => day === dayjs(state.day).format(DATE_FORMAT))
+            .reduce(
+              (ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }),
+              {}
+            );
+          daysSlots.value = store.state.slots.map(({ label, value }) => ({
+            label,
+            value,
+            apartment: daysBookings.value[value],
+          }));
+        }
       }
     );
 
