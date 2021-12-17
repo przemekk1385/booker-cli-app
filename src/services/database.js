@@ -35,7 +35,7 @@ export const slotList = async () => {
   const database = await getDatabase();
 
   const slots = await new Promise((resolve, reject) => {
-    const transaction = database.transaction("slots", "readonly");
+    const transaction = database.transaction(["slots"], "readonly");
     const store = transaction.objectStore("slots");
     let slots = [];
 
