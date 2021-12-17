@@ -1,7 +1,7 @@
 <template>
   <div class="h-100 p-d-flex p-flex-column p-jc-between">
     <Toast position="bottom-center" />
-    <router-view />
+    <BookingForm />
     <div class="p-as-bottom p-grid">
       <div class="p-col">
         <i class="pi pi-info-circle"></i>
@@ -17,7 +17,12 @@ import { useToast } from "primevue/usetoast";
 import { computed, watch } from "vue";
 import { useStore } from "vuex";
 
+import BookingForm from "@/components/BookingForm.vue";
+
 export default {
+  components: {
+    BookingForm,
+  },
   setup() {
     const store = useStore();
     const toast = useToast();
