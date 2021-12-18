@@ -93,13 +93,37 @@ import { useVuelidate } from "@vuelidate/core";
 import { maxLength, minLength, required } from "@vuelidate/validators";
 import dayjs from "dayjs";
 
-const DATE_FORMAT = "YYYY-MM-DD";
+import { DATE_FORMAT } from "@/constants";
 
 export default {
   setup() {
     const store = useStore();
 
-    const isAppSyncing = computed(() => store.getters.isAppSyncing);
+    const formErrors = computed(() => store.getters.latestFormErrors);
+    // const isAppSyncing = computed(() => store.getters.isAppSyncing);
+    const isAppSyncing = ref(false);
+
+    const bookings = computed(() => store.state.bookings);
+    const slots = computed(() => store.state.slots);
+
+    const daysBookings = computed(() =>
+      bookings.value
+        .filter(({ day }) => day === dayjs(state.day).format(DATE_FORMAT))
+        .reduce((ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }), {})
+    );
+
+    const daysSlots = computed(() =>
+      slots.value.map(({ label, value }) => ({
+        label,
+        value,
+        apartment: daysBookings.value[value],
+      }))
+    );
+
+    watch(
+      () => formErrors.value,
+      (errors) => Object.assign($externalResults, errors)
+    );
 
     const rules = {
       day: { required },
@@ -110,13 +134,14 @@ export default {
       },
       slot: { required },
     };
+
     const state = reactive({
       day: undefined,
       identifier: undefined,
       slot: undefined,
     });
-    const $externalResults = reactive({});
 
+    const $externalResults = reactive({});
     const v$ = useVuelidate(rules, state, {
       $externalResults,
     });
@@ -126,9 +151,8 @@ export default {
 
       if (!(await v$.value.$validate())) return;
 
-      let { day } = state;
-      const { identifier, slot } = state;
-      store.dispatch("bookingCreate", {
+      const { day, identifier, slot } = state;
+      store.dispatch("createBooking", {
         day: dayjs(day).format(DATE_FORMAT),
         identifier,
         slot,
@@ -142,50 +166,48 @@ export default {
     };
 
     const calendar = reactive({
-      maxDate: undefined,
-      minDate: undefined,
+      maxDate: computed(() => store.state.maxDate),
+      minDate: computed(() => store.state.minDate),
     });
 
-    const daysSlots = ref([]);
-    const daysBookings = ref([]);
-    watch(
-      () => isAppSyncing.value,
-      (val) => {
-        if (!val) {
-          daysBookings.value = store.state.bookings
-            .filter(({ day }) => day === dayjs(state.day).format(DATE_FORMAT))
-            .reduce(
-              (ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }),
-              {}
-            );
-          daysSlots.value = store.state.slots.map(({ label, value }) => ({
-            label,
-            value,
-            apartment: daysBookings.value[value],
-          }));
-        }
-      }
-    );
-
-    const formErrors = computed(() => store.getters.latestFormErrors);
-    watch(
-      () => formErrors.value,
-      (errors) => Object.assign($externalResults, errors)
-    );
-
-    onMounted(async () => {
-      const maxDate = (() => store.state.maxDate)();
-      const minDate = (() => store.state.minDate)();
-
-      state.day = minDate.toDate();
-      calendar.maxDate = maxDate.toDate();
-      calendar.minDate = minDate.toDate();
-
-      await Promise.all([
-        store.dispatch("bookingList"),
-        store.dispatch("slotList"),
-      ]);
+    onMounted(() => {
+      state.day = calendar.minDate;
     });
+
+    // const daysSlots = ref([]);
+    // const daysBookings = ref([]);
+    // watch(
+    //   () => isAppSyncing.value,
+    //   (val) => {
+    //     if (!val) {
+    //       daysBookings.value = store.state.bookings
+    //         .filter(({ day }) => day === dayjs(state.day).format(DATE_FORMAT))
+    //         .reduce(
+    //           (ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }),
+    //           {}
+    //         );
+    //       daysSlots.value = store.state.slots.map(({ label, value }) => ({
+    //         label,
+    //         value,
+    //         apartment: daysBookings.value[value],
+    //       }));
+    //     }
+    //   }
+    // );
+
+    // onMounted(async () => {
+    //   const maxDate = (() => store.state.maxDate)();
+    //   const minDate = (() => store.state.minDate)();
+
+    //   state.day = minDate.toDate();
+    //   calendar.maxDate = maxDate.toDate();
+    //   calendar.minDate = minDate.toDate();
+
+    //   await Promise.all([
+    //     store.dispatch("bookingList"),
+    //     store.dispatch("slotList"),
+    //   ]);
+    // });
 
     return {
       state,
