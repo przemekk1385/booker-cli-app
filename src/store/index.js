@@ -2,7 +2,10 @@ import { ToastSeverity } from "primevue/api";
 import { createStore } from "vuex";
 import axios from "axios";
 
-import { getDatabase, slotList as storeSlotList } from "@/services/database";
+import {
+  slotList as dbSlotList,
+  slotBatchCreate as dbSlotBatchCreate,
+} from "@/services/database";
 import {
   bookingList,
   bookingCreate,
@@ -53,7 +56,7 @@ const actions = {
   async initialize({ dispatch, getters, state }) {
     await dispatch("fetchHealthStatus");
 
-    await dispatch("fetchSlotsFromStore");
+    await dispatch("fetchSlotsFromDatabase");
     if (getters.isApiOnline && !state.slots) {
       await dispatch("fetchSlotsFromApi");
     }
@@ -98,11 +101,7 @@ const actions = {
       });
     }
   },
-  async fetchSlotsFromStore({ commit }) {
-    const slots = await storeSlotList(); // TODO: error handling (?)
 
-    commit("slots", slots);
-  },
   async fetchHealthStatus({ commit }) {
     commit(
       "healthStatus",
@@ -148,28 +147,23 @@ const actions = {
 
     return false;
   },
+
+  async fetchSlotsFromDatabase({ commit }) {
+    const slots = await dbSlotList(); // TODO: error handling (?)
+
+    commit("slots", slots);
+  },
+
+  async insertSlotsToDatabase(store, payload) {
+    await dbSlotBatchCreate(payload); // TODO: error handling (?)
+  },
 };
 
 const plugins = [
   (store) => {
     store.subscribe(async ({ type, payload }) => {
-      const database = await getDatabase();
-
       if (type === "slots") {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction("slots", "readwrite");
-          const store = transaction.objectStore("slots");
-
-          payload.forEach((item) => store.put(item));
-
-          transaction.oncomplete = () => {
-            resolve("Item successfully saved.");
-          };
-
-          transaction.onerror = (event) => {
-            reject(event);
-          };
-        });
+        store.dispatch("insertSlotsToDatabase", payload);
       }
     });
   },
