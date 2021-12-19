@@ -1,7 +1,6 @@
 import { ToastSeverity } from "primevue/api";
 import { createStore } from "vuex";
 import axios from "axios";
-import dayjs from "dayjs";
 
 import { getDatabase, slotList as storeSlotList } from "@/services/database";
 import {
@@ -10,14 +9,7 @@ import {
   slotList as apiSlotList,
 } from "@/services/api";
 
-const today = dayjs();
-
 const state = {
-  day: today.toDate(),
-
-  minDate: today.toDate(),
-  maxDate: today.add(1, "day").toDate(),
-
   formErrors: [],
   messages: [],
 
@@ -25,30 +17,17 @@ const state = {
 
   bookings: [],
   slots: [],
+
+  fetchingBookings: false,
 };
 
 const getters = {
   isApiOnline: ({ healthStatus }) => healthStatus === 200,
-  isAppSyncing: ({ bookings, slots }) => !bookings || !slots, // TODO: fix
   latestFormErrors: ({ formErrors }) => formErrors[formErrors.length - 1],
   latestMessage: ({ messages }) => messages[messages.length - 1],
-
-  // daysBookings: (state) =>
-  //   state.bookings
-  //     .filter(({ day }) => day === dayjs(state.day).format(DATE_FORMAT))
-  //     .reduce((ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }), {}),
-  // daysSlots: (state) =>
-  //   state.slots.map(({ label, value }) => ({
-  //     label,
-  //     value,
-  //     apartment: getters.daysBookings[value],
-  //   })),
 };
 
 const mutations = {
-  bookings(state, payload) {
-    state.bookings = payload;
-  },
   healthStatus(state, payload) {
     state.healthStatus = payload;
   },
@@ -56,15 +35,18 @@ const mutations = {
     state.slots = payload;
   },
 
-  clearBookings(state) {
-    state.bookings = undefined;
+  finishFetchingBookings(state, payload) {
+    state.bookings = payload;
+    state.fetchingBookings = false;
   },
-  clearSlots(state) {
-    state.slots = undefined;
+  startFetchingBookings(state) {
+    state.bookings = [];
+    state.fetchingBookings = true;
   },
 
   pushBooking(state, payload) {
     state.bookings.push(payload);
+    console.log(state.bookings);
   },
   pushFormErrors(state, payload) {
     state.formErrors.push(payload);
@@ -79,36 +61,48 @@ const actions = {
     await dispatch("fetchHealthStatus");
 
     await dispatch("fetchSlotsFromStore");
-    if (getters.isApiOnline && !state.slots.length) {
+    if (getters.isApiOnline && !state.slots) {
       await dispatch("fetchSlotsFromApi");
     }
 
     await dispatch("fetchBookingsFromApi");
   },
   async fetchBookingsFromApi({ commit }) {
+    commit("startFetchingBookings");
+
     const { data: bookings, status } = await bookingList();
 
-    if (!status) {
+    if (status == 200) {
+      commit("finishFetchingBookings", bookings);
+    } else {
+      let detail = "Failed to get bookings";
+      if (status) {
+        detail = `${detail}, got ${status} response code.`;
+      }
+
       commit("pushMessage", {
         severity: ToastSeverity.ERROR,
         summary: "Error",
-        detail: `Failed to get bookings, got ${status} response code.`,
+        detail,
       });
-    } else {
-      commit("bookings", bookings);
     }
   },
   async fetchSlotsFromApi({ commit }) {
     const { data: slots, status } = await apiSlotList();
 
-    if (!status) {
+    if (status == 200) {
+      commit("slots", slots);
+    } else {
+      let detail = "Failed to get slots";
+      if (status) {
+        detail = `${detail}, got ${status} response code.`;
+      }
+
       commit("pushMessage", {
         severity: ToastSeverity.ERROR,
         summary: "Error",
-        detail: `Failed to get slots, got ${status} response code.`,
+        detail,
       });
-    } else {
-      commit("slots", slots);
     }
   },
   async fetchSlotsFromStore({ commit }) {
@@ -137,21 +131,29 @@ const actions = {
         detail: `Booking created.`,
         life: 3000,
       });
+      return true;
     } else if (status === 400) {
       commit("pushFormErrors", errors);
       commit("pushMessage", {
-        severity: ToastSeverity.INFO,
-        summary: "Info",
+        severity: ToastSeverity.ERROR,
+        summary: "Error",
         detail: `Check form fields.`,
         life: 3000,
       });
-    } else if (status) {
+    } else {
+      let detail = "Failed to book";
+      if (status) {
+        detail = `${detail}, got ${status} response code.`;
+      }
+
       commit("pushMessage", {
         severity: ToastSeverity.ERROR,
         summary: "Error",
-        detail: `Failed to book, got ${status} response code.`,
+        detail,
       });
     }
+
+    return false;
   },
 };
 
@@ -177,9 +179,6 @@ const plugins = [
         });
       }
     });
-    // store.subscribeAction(async ({ type, payload }) => {
-    //   console.log(type, payload);
-    // });
   },
 ];
 
