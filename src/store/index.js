@@ -17,8 +17,6 @@ const state = {
 
   bookings: [],
   slots: [],
-
-  fetchingBookings: false,
 };
 
 const getters = {
@@ -31,17 +29,12 @@ const mutations = {
   healthStatus(state, payload) {
     state.healthStatus = payload;
   },
+
+  bookings(state, payload) {
+    state.bookings = payload;
+  },
   slots(state, payload) {
     state.slots = payload;
-  },
-
-  finishFetchingBookings(state, payload) {
-    state.bookings = payload;
-    state.fetchingBookings = false;
-  },
-  startFetchingBookings(state) {
-    state.bookings = [];
-    state.fetchingBookings = true;
   },
 
   pushBooking(state, payload) {
@@ -65,15 +58,15 @@ const actions = {
       await dispatch("fetchSlotsFromApi");
     }
 
-    await dispatch("fetchBookingsFromApi");
+    // await dispatch("fetchBookingsFromApi");
   },
   async fetchBookingsFromApi({ commit }) {
-    commit("startFetchingBookings");
+    commit("bookings", []);
 
     const { data: bookings, status } = await bookingList();
 
     if (status == 200) {
-      commit("finishFetchingBookings", bookings);
+      commit("bookings", bookings);
     } else {
       let detail = "Failed to get bookings";
       if (status) {

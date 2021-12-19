@@ -8,6 +8,7 @@ import Button from "primevue/button";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import InputText from "primevue/inputtext";
+import Skeleton from "primevue/skeleton";
 import Tag from "primevue/tag";
 
 import Ripple from "primevue/ripple";
@@ -29,6 +30,7 @@ app.component("Button", Button);
 app.component("Calendar", Calendar);
 app.component("Dropdown", Dropdown);
 app.component("InputText", InputText);
+app.component("Skeleton", Skeleton);
 app.component("Tag", Tag);
 app.component("Toast", Toast);
 

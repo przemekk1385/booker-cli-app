@@ -50,21 +50,26 @@
               inputId="slot"
               v-model="v$.slot.$model"
               :class="{ 'p-invalid': v$.slot.$invalid && v$.slot.$dirty }"
-              :loading="loading"
               optionDisabled="apartment"
               optionLabel="label"
               optionValue="value"
               :options="daysSlots"
               placeholder="Choose slot"
+              @click="lazyLoadDaysSlots()"
             >
               <template #option="slotProps">
-                <div class="p-ai-center p-jc-between p-d-flex">
+                <div v-if="!loading" class="p-ai-center p-jc-between p-d-flex">
                   {{ slotProps.option.label }}
                   <Tag
                     v-if="slotProps.option.apartment"
                     :value="slotProps.option.apartment"
                   ></Tag>
                 </div>
+                <Skeleton
+                  v-else
+                  :width="slotProps.option.value % 2 ? '75%' : '50%'"
+                  height="1rem"
+                />
               </template>
             </Dropdown>
             <small
@@ -87,7 +92,7 @@
 </template>
 
 <script>
-import { computed } from "vue";
+import { ref } from "vue";
 import { useStore } from "vuex";
 import dayjs from "dayjs";
 
@@ -112,7 +117,13 @@ export default {
 
     const store = useStore();
 
-    const loading = computed(() => store.state.fetchingBookings);
+    const loading = ref(false);
+
+    const lazyLoadDaysSlots = async () => {
+      loading.value = true;
+      await store.dispatch("fetchBookingsFromApi");
+      setTimeout(() => (loading.value = false), 500);
+    };
 
     return {
       state,
@@ -123,6 +134,7 @@ export default {
       daysSlots,
 
       loading,
+      lazyLoadDaysSlots,
     };
   },
 };
