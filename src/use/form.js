@@ -44,7 +44,7 @@ export default function useForm() {
 
     const { day, identifier, slot } = state;
     if (
-      store.dispatch("createBooking", {
+      await store.dispatch("createBooking", {
         day: dayjs(day).format(DATE_FORMAT),
         identifier,
         slot,
