@@ -26,12 +26,20 @@ export default function useSlots(props) {
 
   const slots = computed(() => store.state.slots);
 
+  const isTooLate = (label) =>
+    parseInt(label.split(":")[0]) < dayjs().hour() ? "OFFTIME" : undefined;
+
   const daysSlots = computed(() =>
-    slots.value.map(({ label, value }) => ({
-      label,
-      value,
-      apartment: (daysBookings.value || {})[value],
-    }))
+    slots.value.map(({ label, value }) => {
+      const apartment = (daysBookings.value || {})[value];
+
+      return {
+        label,
+        value,
+        apartment,
+        disabled: apartment || isTooLate(label),
+      };
+    })
   );
 
   return { daysBookings, daysSlots };

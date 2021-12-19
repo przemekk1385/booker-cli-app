@@ -50,7 +50,7 @@
               inputId="slot"
               v-model="v$.slot.$model"
               :class="{ 'p-invalid': v$.slot.$invalid && v$.slot.$dirty }"
-              optionDisabled="apartment"
+              optionDisabled="disabled"
               optionLabel="label"
               optionValue="value"
               :options="daysSlots"
