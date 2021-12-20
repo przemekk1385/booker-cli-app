@@ -28,7 +28,7 @@ export default function useForm() {
 
   const state = reactive({
     day: dayjs().toDate(),
-    identifier: "111222333",
+    identifier: undefined,
     slot: undefined,
   });
 
