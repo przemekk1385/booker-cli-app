@@ -53,11 +53,11 @@ const mutations = {
 };
 
 const actions = {
-  async initialize({ dispatch, getters, state }) {
+  async initialize({ dispatch, getters }) {
     await dispatch("fetchHealthStatus");
 
     await dispatch("fetchSlotsFromDatabase");
-    if (getters.isApiOnline && !state.slots) {
+    if (getters.isApiOnline) {
       await dispatch("fetchSlotsFromApi");
     }
 
