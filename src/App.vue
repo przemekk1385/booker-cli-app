@@ -1,21 +1,21 @@
 <template>
   <Toast
     :breakpoints="{
-      '320px': { width: '100%', padding: '1rem' },
+      '27rem': { width: '100%', padding: '1rem' },
     }"
     position="bottom-center"
   />
   <div class="h-100 p-d-flex p-flex-column p-jc-between">
     <div class="p-grid">
-      <div v-if="!isApiOnline" class="p-col-12">
+      <div v-if="!isApiOnline" class="p-col-12 p-md-4 p-md-offset-4">
         <Message :closable="false" severity="warn">No API connection</Message>
       </div>
-      <div class="p-col-12">
+      <div class="p-col-12 p-md-4 p-md-offset-4">
         <BookingForm />
       </div>
     </div>
     <div class="p-grid">
-      <div class="p-col-12">
+      <div class="p-col-12 p-md-4 p-md-offset-4">
         <i class="pi pi-map-marker p-m-1"></i> Szczytowa 45 A/I, Szczyrk
       </div>
     </div>
