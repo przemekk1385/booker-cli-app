@@ -57,3 +57,22 @@ export const slotList = async () => {
   });
   return slots;
 };
+
+export const slotBatchCreate = async (slots) => {
+  const database = await getDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction("slots", "readwrite");
+    const store = transaction.objectStore("slots");
+
+    slots.forEach((item) => store.put(item));
+
+    transaction.oncomplete = () => {
+      resolve("Item successfully saved.");
+    };
+
+    transaction.onerror = (event) => {
+      reject(event);
+    };
+  });
+};

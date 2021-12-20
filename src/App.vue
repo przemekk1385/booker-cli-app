@@ -3,11 +3,15 @@
     <Toast position="bottom-center" />
     <BookingForm />
     <div class="p-as-bottom p-grid">
-      <div class="p-col">
-        <i class="pi pi-info-circle"></i>
-        {{ isApiOnline ? "Online" : "Offline" }}
+      <div class="p-col p-jc-between p-d-flex">
+        <span class="p-d-inline-block">
+          <i class="pi pi-info-circle"></i>
+          {{ isApiOnline ? "Online" : "Offline" }}
+        </span>
+        <span class="p-d-inline-block">
+          <i class="p-ml-3 pi pi-map-marker"></i> Szczytowa 45 A/I, Szczyrk
+        </span>
       </div>
-      <div class="p-col"><i class="pi pi-mobile"></i> +48 111-222-333</div>
     </div>
   </div>
 </template>

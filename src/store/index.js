@@ -1,23 +1,18 @@
 import { ToastSeverity } from "primevue/api";
 import { createStore } from "vuex";
 import axios from "axios";
-import dayjs from "dayjs";
 
-import { getDatabase, slotList as storeSlotList } from "@/services/database";
+import {
+  slotList as dbSlotList,
+  slotBatchCreate as dbSlotBatchCreate,
+} from "@/services/database";
 import {
   bookingList,
   bookingCreate,
   slotList as apiSlotList,
 } from "@/services/api";
 
-const today = dayjs();
-
 const state = {
-  day: today.toDate(),
-
-  minDate: today.toDate(),
-  maxDate: today.add(1, "day").toDate(),
-
   formErrors: [],
   messages: [],
 
@@ -29,42 +24,25 @@ const state = {
 
 const getters = {
   isApiOnline: ({ healthStatus }) => healthStatus === 200,
-  isAppSyncing: ({ bookings, slots }) => !bookings || !slots, // TODO: fix
   latestFormErrors: ({ formErrors }) => formErrors[formErrors.length - 1],
   latestMessage: ({ messages }) => messages[messages.length - 1],
-
-  // daysBookings: (state) =>
-  //   state.bookings
-  //     .filter(({ day }) => day === dayjs(state.day).format(DATE_FORMAT))
-  //     .reduce((ac, { slot, apartment }) => ({ ...ac, [slot]: apartment }), {}),
-  // daysSlots: (state) =>
-  //   state.slots.map(({ label, value }) => ({
-  //     label,
-  //     value,
-  //     apartment: getters.daysBookings[value],
-  //   })),
 };
 
 const mutations = {
-  bookings(state, payload) {
-    state.bookings = payload;
-  },
   healthStatus(state, payload) {
     state.healthStatus = payload;
+  },
+
+  bookings(state, payload) {
+    state.bookings = payload;
   },
   slots(state, payload) {
     state.slots = payload;
   },
 
-  clearBookings(state) {
-    state.bookings = undefined;
-  },
-  clearSlots(state) {
-    state.slots = undefined;
-  },
-
   pushBooking(state, payload) {
     state.bookings.push(payload);
+    console.log(state.bookings);
   },
   pushFormErrors(state, payload) {
     state.formErrors.push(payload);
@@ -78,44 +56,52 @@ const actions = {
   async initialize({ dispatch, getters, state }) {
     await dispatch("fetchHealthStatus");
 
-    await dispatch("fetchSlotsFromStore");
-    if (getters.isApiOnline && !state.slots.length) {
+    await dispatch("fetchSlotsFromDatabase");
+    if (getters.isApiOnline && !state.slots) {
       await dispatch("fetchSlotsFromApi");
     }
 
-    await dispatch("fetchBookingsFromApi");
+    // await dispatch("fetchBookingsFromApi");
   },
   async fetchBookingsFromApi({ commit }) {
+    commit("bookings", []);
+
     const { data: bookings, status } = await bookingList();
 
-    if (!status) {
+    if (status == 200) {
+      commit("bookings", bookings);
+    } else {
+      let detail = "Failed to get bookings";
+      if (status) {
+        detail = `${detail}, got ${status} response code.`;
+      }
+
       commit("pushMessage", {
         severity: ToastSeverity.ERROR,
         summary: "Error",
-        detail: `Failed to get bookings, got ${status} response code.`,
+        detail,
       });
-    } else {
-      commit("bookings", bookings);
     }
   },
   async fetchSlotsFromApi({ commit }) {
     const { data: slots, status } = await apiSlotList();
 
-    if (!status) {
+    if (status == 200) {
+      commit("slots", slots);
+    } else {
+      let detail = "Failed to get slots";
+      if (status) {
+        detail = `${detail}, got ${status} response code.`;
+      }
+
       commit("pushMessage", {
         severity: ToastSeverity.ERROR,
         summary: "Error",
-        detail: `Failed to get slots, got ${status} response code.`,
+        detail,
       });
-    } else {
-      commit("slots", slots);
     }
   },
-  async fetchSlotsFromStore({ commit }) {
-    const slots = await storeSlotList(); // TODO: error handling (?)
 
-    commit("slots", slots);
-  },
   async fetchHealthStatus({ commit }) {
     commit(
       "healthStatus",
@@ -137,49 +123,49 @@ const actions = {
         detail: `Booking created.`,
         life: 3000,
       });
+      return true;
     } else if (status === 400) {
       commit("pushFormErrors", errors);
       commit("pushMessage", {
-        severity: ToastSeverity.INFO,
-        summary: "Info",
+        severity: ToastSeverity.ERROR,
+        summary: "Error",
         detail: `Check form fields.`,
         life: 3000,
       });
-    } else if (status) {
+    } else {
+      let detail = "Failed to book";
+      if (status) {
+        detail = `${detail}, got ${status} response code.`;
+      }
+
       commit("pushMessage", {
         severity: ToastSeverity.ERROR,
         summary: "Error",
-        detail: `Failed to book, got ${status} response code.`,
+        detail,
       });
     }
+
+    return false;
+  },
+
+  async fetchSlotsFromDatabase({ commit }) {
+    const slots = await dbSlotList(); // TODO: error handling (?)
+
+    commit("slots", slots);
+  },
+
+  async insertSlotsToDatabase(store, payload) {
+    await dbSlotBatchCreate(payload); // TODO: error handling (?)
   },
 };
 
 const plugins = [
   (store) => {
     store.subscribe(async ({ type, payload }) => {
-      const database = await getDatabase();
-
       if (type === "slots") {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction("slots", "readwrite");
-          const store = transaction.objectStore("slots");
-
-          payload.forEach((item) => store.put(item));
-
-          transaction.oncomplete = () => {
-            resolve("Item successfully saved.");
-          };
-
-          transaction.onerror = (event) => {
-            reject(event);
-          };
-        });
+        store.dispatch("insertSlotsToDatabase", payload);
       }
     });
-    // store.subscribeAction(async ({ type, payload }) => {
-    //   console.log(type, payload);
-    // });
   },
 ];
 
