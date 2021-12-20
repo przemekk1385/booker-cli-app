@@ -103,11 +103,11 @@ export default {
   props: {
     minDate: {
       type: Date,
-      default: dayjs().toDate(),
+      default: dayjs().subtract(1, "day").toDate(),
     },
     maxDate: {
       type: Date,
-      default: dayjs().add(1, "day").toDate(),
+      default: dayjs().add(2, "day").toDate(),
     },
   },
   setup() {
