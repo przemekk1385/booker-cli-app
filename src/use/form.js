@@ -24,12 +24,14 @@ export default function useForm() {
       required,
     },
     slot: { required },
+    cancel: {},
   };
 
   const state = reactive({
     day: dayjs().toDate(),
     identifier: undefined,
     slot: undefined,
+    cancel: false,
   });
 
   const $externalResults = reactive({});
@@ -55,6 +57,7 @@ export default function useForm() {
   };
   const handleReset = () => {
     state.day = undefined;
+    state.cancel = false;
     state.identifier = undefined;
     state.slot = undefined;
     v$.value.$reset();
