@@ -29,3 +29,9 @@ export const slotList = async () =>
     .get(`${process.env.VUE_APP_API_HOST}/api/v1/slot/`)
     .then(({ data, status }) => ({ data, status }))
     .catch(({ response: { status = undefined } = {} }) => ({ status }));
+
+export const healthStatus = async () =>
+  await axios
+    .get(`${process.env.VUE_APP_API_HOST}/api/v1/health/`)
+    .then(({ status }) => status)
+    .catch(() => undefined);
