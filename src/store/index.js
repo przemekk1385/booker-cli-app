@@ -87,8 +87,12 @@ const actions = {
 
   async cancelBooking({ dispatch }, payload) {
     const { errors, status } = await bookingCancel(payload);
-    const { non_field_errors: nonFieldErrors = [] } = errors;
-    const detail = nonFieldErrors[0] || "Check form fields.";
+    let detail = "Check form fields.";
+
+    if (errors) {
+      const { non_field_errors: nonFieldErrors = [] } = errors;
+      detail = nonFieldErrors[0] || detail;
+    }
 
     const statusCodeHandlers = {
       204: () => dispatch("handleSuccess", "Booking canceled."),
@@ -110,8 +114,12 @@ const actions = {
   },
   async createBooking({ dispatch }, payload) {
     const { errors, status } = await bookingCreate(payload);
-    const { non_field_errors: nonFieldErrors = [] } = errors;
-    const detail = nonFieldErrors[0] || "Check form fields.";
+    let detail = "Check form fields.";
+
+    if (errors) {
+      const { non_field_errors: nonFieldErrors = [] } = errors;
+      detail = nonFieldErrors[0] || detail;
+    }
 
     const statusCodeHandlers = {
       201: () => dispatch("handleSuccess", "Booking created."),
