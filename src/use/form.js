@@ -68,9 +68,9 @@ export default function useForm() {
   const handleReset = () => {
     state.cancel = false;
     state.code = undefined;
-    state.day = undefined;
     state.slot = undefined;
     v$.value.$reset();
+    setTimeout(() => (state.day = dayjs().toDate()));
   };
 
   return { handleSubmit, handleReset, state, v$ };
