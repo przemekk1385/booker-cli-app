@@ -7,7 +7,7 @@
     >
       <div class="p-field">
         <span class="p-input-icon-right">
-          <i class="pi pi-phone" />
+          <i class="pi pi-hashtag" />
           <InputText
             id="code"
             v-model="v$.code.$model"
