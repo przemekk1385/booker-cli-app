@@ -1,6 +1,5 @@
 import { ToastSeverity } from "primevue/api";
 import { createStore } from "vuex";
-import axios from "axios";
 
 import {
   slotList as dbSlotList,
@@ -8,7 +7,9 @@ import {
 } from "@/services/database";
 import {
   bookingList,
+  bookingCancel,
   bookingCreate,
+  healthStatus,
   slotList as apiSlotList,
 } from "@/services/api";
 
@@ -29,26 +30,22 @@ const getters = {
 };
 
 const mutations = {
-  healthStatus(state, payload) {
-    state.healthStatus = payload;
+  healthStatus(state, healthStatus) {
+    state.healthStatus = healthStatus;
   },
 
-  bookings(state, payload) {
-    state.bookings = payload;
+  bookings(state, bookings) {
+    state.bookings = bookings;
   },
-  slots(state, payload) {
-    state.slots = payload;
+  slots(state, slots) {
+    state.slots = slots;
   },
 
-  pushBooking(state, payload) {
-    state.bookings.push(payload);
-    console.log(state.bookings);
+  formErrors(state, errors) {
+    state.formErrors.push(errors);
   },
-  pushFormErrors(state, payload) {
-    state.formErrors.push(payload);
-  },
-  pushMessage(state, payload) {
-    state.messages.push(payload);
+  messages(state, message) {
+    state.messages.push(message);
   },
 };
 
@@ -63,89 +60,76 @@ const actions = {
 
     // await dispatch("fetchBookingsFromApi");
   },
-  async fetchBookingsFromApi({ commit }) {
+  async fetchBookingsFromApi({ commit, dispatch }) {
     commit("bookings", []);
 
     const { data: bookings, status } = await bookingList();
 
-    if (status == 200) {
+    if (status === 200) {
       commit("bookings", bookings);
     } else {
-      let detail = "Failed to get bookings";
-      if (status) {
-        detail = `${detail}, got ${status} response code.`;
-      }
-
-      commit("pushMessage", {
-        severity: ToastSeverity.ERROR,
-        summary: "Error",
-        detail,
-      });
+      dispatch("handleFailureNoErrors", status);
     }
   },
-  async fetchSlotsFromApi({ commit }) {
+  async fetchSlotsFromApi({ commit, dispatch }) {
     const { data: slots, status } = await apiSlotList();
 
-    if (status == 200) {
+    if (status === 200) {
       commit("slots", slots);
     } else {
-      let detail = "Failed to get slots";
-      if (status) {
-        detail = `${detail}, got ${status} response code.`;
-      }
-
-      commit("pushMessage", {
-        severity: ToastSeverity.ERROR,
-        summary: "Error",
-        detail,
-      });
+      dispatch("handleFailureNoErrors", status);
     }
   },
 
   async fetchHealthStatus({ commit }) {
-    commit(
-      "healthStatus",
-      await axios
-        .get(`${process.env.VUE_APP_API_HOST}/api/v1/health/`)
-        .then(({ status }) => status)
-        .catch(() => undefined)
-    );
+    commit("healthStatus", await healthStatus());
   },
 
-  async createBooking({ commit }, payload) {
-    const { data: booking, errors, status } = await bookingCreate(payload);
+  async cancelBooking({ dispatch }, payload) {
+    const { errors, status } = await bookingCancel(payload);
+    const { non_field_errors: nonFieldErrors = [] } = errors;
+    const detail = nonFieldErrors[0] || "Check form fields.";
 
-    if (status === 201) {
-      commit("pushBooking", booking);
-      commit("pushMessage", {
-        severity: ToastSeverity.SUCCESS,
-        summary: "Ok",
-        detail: `Booking created.`,
-        life: 3000,
-      });
-      return true;
-    } else if (status === 400) {
-      commit("pushFormErrors", errors);
-      commit("pushMessage", {
-        severity: ToastSeverity.ERROR,
-        summary: "Error",
-        detail: `Check form fields.`,
-        life: 3000,
-      });
-    } else {
-      let detail = "Failed to book";
-      if (status) {
-        detail = `${detail}, got ${status} response code.`;
-      }
+    const statusCodeHandlers = {
+      204: () => dispatch("handleSuccess", "Booking canceled."),
+      400: () => dispatch("handleFailure", { detail, errors }),
+      404: () =>
+        dispatch("handleFailure", {
+          detail,
+          errors: {
+            code: "Matching booking not found.",
+          },
+        }),
+      Xxx: () => dispatch("handleFailureNoErrors", status),
+    };
 
-      commit("pushMessage", {
-        severity: ToastSeverity.ERROR,
-        summary: "Error",
-        detail,
-      });
-    }
+    return (
+      (statusCodeHandlers[status] && statusCodeHandlers[status]()) ||
+      statusCodeHandlers.Xxx()
+    );
+  },
+  async createBooking({ dispatch }, payload) {
+    const { errors, status } = await bookingCreate(payload);
+    const { non_field_errors: nonFieldErrors = [] } = errors;
+    const detail = nonFieldErrors[0] || "Check form fields.";
 
-    return false;
+    const statusCodeHandlers = {
+      201: () => dispatch("handleSuccess", "Booking created."),
+      400: () => dispatch("handleFailure", { detail, errors }),
+      404: () =>
+        dispatch("handleFailure", {
+          detail,
+          errors: {
+            code: "Matching apartment not found.",
+          },
+        }),
+      Xxx: () => dispatch("handleFailureNoErrors", status),
+    };
+
+    return (
+      (statusCodeHandlers[status] && statusCodeHandlers[status]()) ||
+      statusCodeHandlers.Xxx()
+    );
   },
 
   async fetchSlotsFromDatabase({ commit }) {
@@ -153,9 +137,41 @@ const actions = {
 
     commit("slots", slots);
   },
+  async insertSlotsToDatabase(store, slots) {
+    await dbSlotBatchCreate(slots); // TODO: error handling (?)
+  },
 
-  async insertSlotsToDatabase(store, payload) {
-    await dbSlotBatchCreate(payload); // TODO: error handling (?)
+  handleFailure({ commit }, { detail, errors }) {
+    commit("formErrors", errors);
+    commit("messages", {
+      severity: ToastSeverity.ERROR,
+      summary: "Error",
+      detail,
+      life: 3000,
+    });
+    return false;
+  },
+  handleFailureNoErrors({ commit }, status) {
+    let detail = "Failed to book";
+    if (status) {
+      detail = `${detail}, got ${status} response code.`;
+    }
+
+    commit("messages", {
+      severity: ToastSeverity.ERROR,
+      summary: "Error",
+      detail,
+    });
+    return false;
+  },
+  handleSuccess({ commit }, detail) {
+    commit("messages", {
+      severity: ToastSeverity.SUCCESS,
+      summary: "Ok",
+      detail,
+      life: 3000,
+    });
+    return true;
   },
 };
 
