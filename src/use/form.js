@@ -1,7 +1,7 @@
 import { computed, reactive, watch } from "vue";
 import { useStore } from "vuex";
 import { useVuelidate } from "@vuelidate/core";
-import { maxLength, minLength, required } from "@vuelidate/validators";
+import { maxLength, required, requiredUnless } from "@vuelidate/validators";
 import dayjs from "dayjs";
 
 import { DATE_FORMAT } from "../constants";
@@ -17,18 +17,21 @@ export default function useForm() {
   );
 
   const rules = {
-    day: { required },
-    identifier: {
-      maxLength: maxLength(9),
-      minLength: minLength(9),
+    cancel: {},
+    code: {
+      maxLength: maxLength(10),
       required,
     },
-    slot: { required },
+    day: { required },
+    slot: {
+      requiredUnlessCancel: requiredUnless(() => state.cancel),
+    },
   };
 
   const state = reactive({
+    cancel: false,
+    code: undefined,
     day: dayjs().toDate(),
-    identifier: undefined,
     slot: undefined,
   });
 
@@ -42,22 +45,32 @@ export default function useForm() {
 
     if (!(await v$.value.$validate())) return;
 
-    const { day, identifier, slot } = state;
-    if (
-      await store.dispatch("createBooking", {
+    const { cancel, code, day, slot } = state;
+    let isSuccess;
+
+    if (!cancel) {
+      isSuccess = await store.dispatch("createBooking", {
+        code,
         day: dayjs(day).format(DATE_FORMAT),
-        identifier,
         slot,
-      })
-    ) {
+      });
+    } else {
+      isSuccess = await store.dispatch("cancelBooking", {
+        code,
+        day: dayjs(day).format(DATE_FORMAT),
+      });
+    }
+
+    if (isSuccess) {
       handleReset();
     }
   };
   const handleReset = () => {
-    state.day = undefined;
-    state.identifier = undefined;
+    state.cancel = false;
+    state.code = undefined;
     state.slot = undefined;
     v$.value.$reset();
+    setTimeout(() => (state.day = dayjs().toDate()));
   };
 
   return { handleSubmit, handleReset, state, v$ };

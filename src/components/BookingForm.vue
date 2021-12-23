@@ -7,18 +7,18 @@
     >
       <div class="p-field">
         <span class="p-input-icon-right">
-          <i class="pi pi-phone" />
+          <i class="pi pi-hashtag" />
           <InputText
-            id="identifier"
-            v-model="v$.identifier.$model"
+            id="code"
+            v-model="v$.code.$model"
             :class="{
-              'p-invalid': v$.identifier.$invalid && v$.identifier.$dirty,
+              'p-invalid': v$.code.$invalid && v$.code.$dirty,
             }"
             type="text"
           />
         </span>
         <small
-          v-for="error of v$.identifier.$errors"
+          v-for="error of v$.code.$errors"
           :key="error.$uid"
           class="p-d-block p-error"
         >
@@ -48,6 +48,7 @@
           inputId="slot"
           v-model="v$.slot.$model"
           :class="{ 'p-invalid': v$.slot.$invalid && v$.slot.$dirty }"
+          :disabled="v$.cancel.$model"
           optionDisabled="disabled"
           optionLabel="label"
           optionValue="value"
@@ -60,7 +61,7 @@
               {{ slotProps.option.label }}
               <Tag
                 v-if="slotProps.option.apartment"
-                :value="slotProps.option.apartment"
+                :value="`Apartment ${slotProps.option.apartment}`"
               ></Tag>
             </div>
             <Skeleton
@@ -79,9 +80,27 @@
         </small>
       </div>
 
-      <span class="p-buttonset">
-        <Button icon="pi pi-check" type="submit" />
-        <Button class="p-button-danger" icon="pi pi-times" type="reset" />
+      <div class="p-field-checkbox">
+        <Checkbox id="cancel" v-model="v$.cancel.$model" :binary="true" />
+        <label for="cancel">Cancel booking</label>
+      </div>
+
+      <span class="p-buttonset p-mt-6">
+        <Button
+          v-if="!v$.cancel.$model"
+          class="p-button-success"
+          icon="pi pi-calendar-plus"
+          type="submit"
+          label="Book"
+        />
+        <Button
+          v-else
+          class="p-button-danger"
+          icon="pi pi-calendar-minus"
+          type="submit"
+          label="Cancel"
+        />
+        <Button icon="pi pi-times" type="reset" />
       </span>
     </form>
   </div>
@@ -135,3 +154,21 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.p-fluid .p-buttonset .p-button {
+  flex: unset;
+}
+
+.p-fluid .p-button {
+  width: unset;
+}
+
+.p-buttonset .p-button:first-of-type {
+  flex-grow: 1;
+}
+
+.p-buttonset .p-button:last-of-type {
+  width: 3rem;
+}
+</style>

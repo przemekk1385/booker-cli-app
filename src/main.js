@@ -6,6 +6,7 @@ import PrimeVue from "primevue/config";
 
 import Button from "primevue/button";
 import Calendar from "primevue/calendar";
+import Checkbox from "primevue/checkbox";
 import Dropdown from "primevue/dropdown";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
@@ -29,6 +30,7 @@ app.use(ToastService);
 
 app.component("Button", Button);
 app.component("Calendar", Calendar);
+app.component("Checkbox", Checkbox);
 app.component("Dropdown", Dropdown);
 app.component("InputText", InputText);
 app.component("Message", Message);

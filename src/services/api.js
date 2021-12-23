@@ -6,16 +6,26 @@ export const bookingList = async () =>
     .then(({ data, status }) => ({ data, status }))
     .catch(({ response: { status } = {} }) => ({ status }));
 
-export const bookingCreate = async ({ day, identifier, slot }) =>
+export const bookingCreate = async (payload) =>
   await axios
-    .post(`${process.env.VUE_APP_API_HOST}/api/v1/booking/`, {
-      day,
-      identifier,
-      slot,
-    })
+    .post(`${process.env.VUE_APP_API_HOST}/api/v1/booking/`, payload)
     .then(({ data, status }) => ({ data, status }))
     .catch(({ response: { data: errors, status } = {} }) => {
-      if (status === 400) {
+      if (status === 400 || status === 404) {
+        return { errors, status };
+      } else {
+        return {
+          status,
+        };
+      }
+    });
+
+export const bookingCancel = async (payload) =>
+  await axios
+    .post(`${process.env.VUE_APP_API_HOST}/api/v1/booking/cancel/`, payload)
+    .then(({ data, status }) => ({ data, status }))
+    .catch(({ response: { data: errors, status } = {} }) => {
+      if (status === 400 || status === 404) {
         return { errors, status };
       } else {
         return {
@@ -29,3 +39,9 @@ export const slotList = async () =>
     .get(`${process.env.VUE_APP_API_HOST}/api/v1/slot/`)
     .then(({ data, status }) => ({ data, status }))
     .catch(({ response: { status = undefined } = {} }) => ({ status }));
+
+export const healthStatus = async () =>
+  await axios
+    .get(`${process.env.VUE_APP_API_HOST}/api/v1/health/`)
+    .then(({ status }) => status)
+    .catch(() => undefined);
