@@ -68,7 +68,10 @@ const actions = {
     if (status === 200) {
       commit("bookings", bookings);
     } else {
-      dispatch("handleFailureNoErrors", status);
+      dispatch("handleFailureNoErrors", {
+        detail: "Failed to get bookings",
+        status,
+      });
     }
   },
   async fetchSlotsFromApi({ commit, dispatch }) {
@@ -77,7 +80,10 @@ const actions = {
     if (status === 200) {
       commit("slots", slots);
     } else {
-      dispatch("handleFailureNoErrors", status);
+      dispatch("handleFailureNoErrors", {
+        detail: "Failed to get slots",
+        status,
+      });
     }
   },
 
@@ -104,7 +110,11 @@ const actions = {
             code: "Matching booking not found.",
           },
         }),
-      Xxx: () => dispatch("handleFailureNoErrors", status),
+      Xxx: () =>
+        dispatch("handleFailureNoErrors", {
+          detail: "Failed to cancel",
+          status,
+        }),
     };
 
     return (
@@ -131,7 +141,8 @@ const actions = {
             code: "Matching apartment not found.",
           },
         }),
-      Xxx: () => dispatch("handleFailureNoErrors", status),
+      Xxx: () =>
+        dispatch("handleFailureNoErrors", { detail: "Failed to book", status }),
     };
 
     return (
@@ -159,10 +170,11 @@ const actions = {
     });
     return false;
   },
-  handleFailureNoErrors({ commit }, status) {
-    let detail = "Failed to book";
+  handleFailureNoErrors({ commit }, { detail, status }) {
     if (status) {
       detail = `${detail}, got ${status} response code.`;
+    } else {
+      detail = `${detail}.`;
     }
 
     commit("messages", {

@@ -14,6 +14,7 @@
             :class="{
               'p-invalid': v$.code.$invalid && v$.code.$dirty,
             }"
+            placeholder="Code"
             type="text"
           />
         </span>
@@ -48,12 +49,12 @@
           inputId="slot"
           v-model="v$.slot.$model"
           :class="{ 'p-invalid': v$.slot.$invalid && v$.slot.$dirty }"
-          :disabled="v$.cancel.$model"
+          :disabled="v$.cancel.$model || !isApiOnline"
           optionDisabled="disabled"
           optionLabel="label"
           optionValue="value"
           :options="daysSlots"
-          placeholder="Choose slot"
+          placeholder="Slot"
           @click="lazyLoadDaysSlots()"
         >
           <template #option="slotProps">
@@ -89,6 +90,7 @@
         <Button
           v-if="!v$.cancel.$model"
           class="p-button-success"
+          :disabled="!isApiOnline"
           icon="pi pi-calendar-plus"
           type="submit"
           label="Book"
@@ -96,6 +98,7 @@
         <Button
           v-else
           class="p-button-danger"
+          :disabled="!isApiOnline"
           icon="pi pi-calendar-minus"
           type="submit"
           label="Cancel"
@@ -107,7 +110,7 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import dayjs from "dayjs";
 
@@ -131,6 +134,7 @@ export default {
     const { daysSlots } = useSlots(state);
 
     const store = useStore();
+    const isApiOnline = computed(() => store.getters.isApiOnline);
 
     const loading = ref(false);
 
@@ -148,6 +152,7 @@ export default {
 
       daysSlots,
 
+      isApiOnline,
       loading,
       lazyLoadDaysSlots,
     };
