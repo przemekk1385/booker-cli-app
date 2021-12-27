@@ -1,6 +1,12 @@
 import { ToastSeverity } from "primevue/api";
 import { createStore } from "vuex";
 
+import i18n from "@/i18n";
+
+const {
+  global: { t },
+} = i18n;
+
 import {
   slotList as dbSlotList,
   slotBatchCreate as dbSlotBatchCreate,
@@ -69,7 +75,7 @@ const actions = {
       commit("bookings", bookings);
     } else {
       dispatch("handleFailureNoErrors", {
-        detail: "Failed to get bookings",
+        detail: t("store.fetchBookingsFromApi.failureDetail"),
         status,
       });
     }
@@ -81,7 +87,7 @@ const actions = {
       commit("slots", slots);
     } else {
       dispatch("handleFailureNoErrors", {
-        detail: "Failed to get slots",
+        detail: t("store.fetchSlotsFromApi.failureDetail"),
         status,
       });
     }
@@ -93,7 +99,7 @@ const actions = {
 
   async cancelBooking({ dispatch }, payload) {
     const { errors, status } = await bookingCancel(payload);
-    let detail = "Check form fields.";
+    let detail = t("store.cancelBooking.formErrorsDetail");
 
     if (errors) {
       const { non_field_errors: nonFieldErrors = [] } = errors;
@@ -101,18 +107,19 @@ const actions = {
     }
 
     const statusCodeHandlers = {
-      204: () => dispatch("handleSuccess", "Booking canceled."),
+      204: () =>
+        dispatch("handleSuccess", t("store.cancelBooking.successDetail")),
       400: () => dispatch("handleFailure", { detail, errors }),
       404: () =>
         dispatch("handleFailure", {
           detail,
           errors: {
-            code: "Matching booking not found.",
+            code: t("store.cancelBooking.errors.codeNotFound"),
           },
         }),
       Xxx: () =>
         dispatch("handleFailureNoErrors", {
-          detail: "Failed to cancel",
+          detail: t("store.cancelBooking.otherErrorsDetail"),
           status,
         }),
     };
@@ -124,7 +131,7 @@ const actions = {
   },
   async createBooking({ dispatch }, payload) {
     const { errors, status } = await bookingCreate(payload);
-    let detail = "Check form fields.";
+    let detail = t("store.createBooking.formErrorsDetail");
 
     if (errors) {
       const { non_field_errors: nonFieldErrors = [] } = errors;
@@ -132,17 +139,21 @@ const actions = {
     }
 
     const statusCodeHandlers = {
-      201: () => dispatch("handleSuccess", "Booking created."),
+      201: () =>
+        dispatch("handleSuccess", t("store.createBooking.successDetail")),
       400: () => dispatch("handleFailure", { detail, errors }),
       404: () =>
         dispatch("handleFailure", {
           detail,
           errors: {
-            code: "Matching apartment not found.",
+            code: t("store.createBooking.errors.codeNotFound"),
           },
         }),
       Xxx: () =>
-        dispatch("handleFailureNoErrors", { detail: "Failed to book", status }),
+        dispatch("handleFailureNoErrors", {
+          detail: t("store.cancelBooking.otherErrorsDetail"),
+          status,
+        }),
     };
 
     return (
@@ -164,7 +175,7 @@ const actions = {
     commit("formErrors", errors);
     commit("messages", {
       severity: ToastSeverity.ERROR,
-      summary: "Error",
+      summary: t("store.handleFailure.errorSummary"),
       detail,
       life: 3000,
     });
@@ -172,14 +183,11 @@ const actions = {
   },
   handleFailureNoErrors({ commit }, { detail, status }) {
     if (status) {
-      detail = `${detail}, got ${status} response code.`;
-    } else {
-      detail = `${detail}.`;
+      detail = t("store.handleFailureNoErrors.detail", { detail, status });
     }
-
     commit("messages", {
       severity: ToastSeverity.ERROR,
-      summary: "Error",
+      summary: t("store.handleFailureNoErrors.errorSummary"),
       detail,
     });
     return false;

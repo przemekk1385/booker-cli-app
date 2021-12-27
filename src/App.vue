@@ -8,7 +8,9 @@
   <div class="h-100 p-d-flex p-flex-column p-jc-between">
     <div class="p-grid">
       <div v-if="!isApiOnline" class="p-col-12 p-md-4 p-md-offset-4">
-        <Message :closable="false" severity="warn">No API connection</Message>
+        <Message :closable="false" severity="warn">{{
+          $t("app.noApiConnectionMessage")
+        }}</Message>
       </div>
       <div class="p-col-12 p-md-4 p-md-offset-4">
         <BookingForm />

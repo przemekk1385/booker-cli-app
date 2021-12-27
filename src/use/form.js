@@ -1,10 +1,10 @@
 import { computed, reactive, watch } from "vue";
 import { useStore } from "vuex";
 import { useVuelidate } from "@vuelidate/core";
-import { maxLength, required, requiredUnless } from "@vuelidate/validators";
 import dayjs from "dayjs";
 
-import { DATE_FORMAT } from "../constants";
+import { DATE_FORMAT } from "@/constants";
+import { maxLength, required, requiredUnless } from "@/i18n-validators";
 
 export default function useForm() {
   const store = useStore();

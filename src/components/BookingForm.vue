@@ -14,7 +14,7 @@
             :class="{
               'p-invalid': v$.code.$invalid && v$.code.$dirty,
             }"
-            placeholder="Code"
+            :placeholder="$t('form.codeInputPlaceholder')"
             type="text"
           />
         </span>
@@ -54,7 +54,7 @@
           optionLabel="label"
           optionValue="value"
           :options="daysSlots"
-          placeholder="Slot"
+          :placeholder="$t('form.slotDropdown.placeholder')"
           @click="lazyLoadDaysSlots()"
         >
           <template #option="slotProps">
@@ -62,7 +62,9 @@
               {{ slotProps.option.label }}
               <Tag
                 v-if="slotProps.option.apartment"
-                :value="`Apartment ${slotProps.option.apartment}`"
+                :value="`${$t('form.slotDropdown.optionTagValue')} ${
+                  slotProps.option.apartment
+                }`"
               ></Tag>
             </div>
             <Skeleton
@@ -83,7 +85,7 @@
 
       <div class="p-field-checkbox">
         <Checkbox id="cancel" v-model="v$.cancel.$model" :binary="true" />
-        <label for="cancel">Cancel booking</label>
+        <label for="cancel">{{ $t("form.cancelCheckboxLabel") }}</label>
       </div>
 
       <span class="p-buttonset p-mt-6">
@@ -93,7 +95,7 @@
           :disabled="!isApiOnline"
           icon="pi pi-calendar-plus"
           type="submit"
-          label="Book"
+          :label="$t('form.bookButtonLabel')"
         />
         <Button
           v-else
@@ -101,7 +103,7 @@
           :disabled="!isApiOnline"
           icon="pi pi-calendar-minus"
           type="submit"
-          label="Cancel"
+          :label="$t('form.cancelButtonLabel')"
         />
         <Button icon="pi pi-times" type="reset" />
       </span>

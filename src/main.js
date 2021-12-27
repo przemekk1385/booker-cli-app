@@ -1,7 +1,10 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import "./registerServiceWorker";
-import store from "./store";
+
+import store from "@/store";
+import i18n from "@/i18n";
+
 import PrimeVue from "primevue/config";
 
 import Button from "primevue/button";
@@ -25,6 +28,7 @@ import ToastService from "primevue/toastservice";
 const app = createApp(App);
 
 app.use(store);
+app.use(i18n);
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
 
