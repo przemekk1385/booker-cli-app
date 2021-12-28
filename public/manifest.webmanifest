@@ -1,7 +1,7 @@
 {
   "theme_color": "#4caf50",
   "background_color": "#ffffff",
-  "display": "minimal-ui",
+  "display": "standalone",
   "scope": "/",
   "start_url": "/",
   "name": "Booker",
