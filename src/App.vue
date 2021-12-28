@@ -63,14 +63,14 @@ html {
 }
 
 body {
-  margin: 0;
-  height: inherit;
-  overflow-x: hidden;
-  overflow-y: auto;
   background-color: var(--surface-a);
+  color: var(--text-color);
   font-family: var(--font-family);
   font-weight: 400;
-  color: var(--text-color);
+  height: inherit;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .h-100 {
