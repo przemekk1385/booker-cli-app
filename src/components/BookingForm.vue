@@ -61,9 +61,11 @@
               {{ slotProps.option.label }}
               <Tag
                 v-if="slotProps.option.apartment"
-                :value="`${$t('form.slotDropdown.optionTagValue')} ${
-                  slotProps.option.apartment
-                }`"
+                :value="
+                  $t('form.slotDropdown.optionTagValue', {
+                    number: slotProps.option.apartment,
+                  })
+                "
               ></Tag>
             </div>
             <Skeleton

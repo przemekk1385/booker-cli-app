@@ -59,7 +59,7 @@ export default createI18n({
         codeInputPlaceholder: "Kod",
         slotDropdown: {
           placeholder: "Godzina",
-          optionTagValue: "Apartament",
+          optionTagValue: "Apartament {number}",
         },
         cancelCheckboxLabel: "Odwołaj rezerwację",
         cancelButtonLabel: "Odwołaj",
