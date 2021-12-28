@@ -93,7 +93,7 @@
         <Button
           class="p-button-primary"
           :disabled="!isApiOnline"
-          icon="pi pi-calendar-minus"
+          icon="pi pi-send"
           type="submit"
           :label="buttonLabel"
         />
