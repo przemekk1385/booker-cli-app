@@ -18,7 +18,7 @@ import Tag from "primevue/tag";
 
 import Ripple from "primevue/ripple";
 
-import "primevue/resources/themes/lara-dark-indigo/theme.css";
+import "primevue/resources/themes/saga-green/theme.css";
 import "primevue/resources/primevue.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
@@ -29,7 +29,86 @@ const app = createApp(App);
 
 app.use(store);
 app.use(i18n);
-app.use(PrimeVue, { ripple: true });
+app.use(PrimeVue, {
+  locale: {
+    startsWith: "Zaczyna się od",
+    contains: "Zawiera",
+    notContains: "Nie zawiera",
+    endsWith: "Kończy się na",
+    equals: "Równe",
+    notEquals: "Różne",
+    noFilter: "Brak filtra",
+    lt: "Mniejsze",
+    lte: "Mniejsze lub równe",
+    gt: "Większe",
+    gte: "Większe lub równe",
+    dateIs: "Data jest",
+    dateIsNot: "Data nie jest",
+    dateBefore: "Data jest wcześniej",
+    dateAfter: "Data jest później",
+    clear: "Wyczyść",
+    apply: "Zatwierdź",
+    matchAll: "Dopasuj wszystkie",
+    matchAny: "Dopasuj dowolny",
+    addRule: "Dodaj regułę",
+    removeRule: "Usuń regułę",
+    accept: "Tak",
+    reject: "Nie",
+    choose: "Wybierz",
+    upload: "Wyślij",
+    cancel: "Anuluj",
+    dayNames: [
+      "Niedziela",
+      "Poniedziałek",
+      "Wtorek",
+      "Środa",
+      "Czwartek",
+      "Piątek",
+      "Sobota",
+    ],
+    dayNamesShort: ["Pon.", "Wt.", "Śr.", "Czw.", "Pt.", "Sob.", "Niedz."],
+    dayNamesMin: ["Pn.", "Wt.", "Śr.", "Cz.", "Pt.", "Sb.", "Ni."],
+    monthNames: [
+      "Styczeń",
+      "Luty",
+      "Marzec",
+      "Kwiecień",
+      "Maj",
+      "Czerwiec",
+      "Lipiec",
+      "Sierpień",
+      "Wrzeseń",
+      "Październik",
+      "Listopad",
+      "Grudzień",
+    ],
+    monthNamesShort: [
+      "Sty",
+      "Lut",
+      "Mar",
+      "Kwi",
+      "Maj",
+      "Cze",
+      "Lip",
+      "Sie",
+      "Wrz",
+      "Paź",
+      "Lis",
+      "Gru",
+    ],
+    today: "Dziś",
+    weekHeader: "Tydz.",
+    firstDayOfWeek: 0,
+    dateFormat: "yy-mm-dd",
+    weak: "Słabe",
+    medium: "Średnie",
+    strong: "Mocne",
+    passwordPrompt: "Podaj hasło",
+    emptyFilterMessage: "Nie znaleziono wyników",
+    emptyMessage: "Brak opcji",
+  },
+  ripple: true,
+});
 app.use(ToastService);
 
 app.component("Button", Button);

@@ -31,7 +31,6 @@
           inputId="calendar"
           v-model="v$.day.$model"
           :class="{ 'p-invalid': v$.day.$invalid && v$.day.$dirty }"
-          dateFormat="yy-mm-dd"
           :minDate="minDate"
           :maxDate="maxDate"
           :showIcon="true"
@@ -90,22 +89,17 @@
 
       <span class="p-buttonset p-mt-6">
         <Button
-          v-if="!v$.cancel.$model"
-          class="p-button-success"
-          :disabled="!isApiOnline"
-          icon="pi pi-calendar-plus"
-          type="submit"
-          :label="$t('form.bookButtonLabel')"
-        />
-        <Button
-          v-else
-          class="p-button-danger"
+          class="p-button-primary"
           :disabled="!isApiOnline"
           icon="pi pi-calendar-minus"
           type="submit"
-          :label="$t('form.cancelButtonLabel')"
+          :label="buttonLabel"
         />
-        <Button icon="pi pi-times" type="reset" />
+        <Button
+          class="p-button-outlined p-button-primary"
+          icon="pi pi-times"
+          type="reset"
+        />
       </span>
     </form>
   </div>
@@ -116,8 +110,13 @@ import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import dayjs from "dayjs";
 
+import i18n from "@/i18n";
 import useForm from "@/use/form";
 import useSlots from "@/use/slots";
+
+const {
+  global: { t },
+} = i18n;
 
 export default {
   props: {
@@ -146,6 +145,10 @@ export default {
       setTimeout(() => (loading.value = false), 500);
     };
 
+    const buttonLabel = computed(() =>
+      !state.cancel ? t("form.bookButtonLabel") : t("form.cancelButtonLabel")
+    );
+
     return {
       state,
       v$,
@@ -157,6 +160,7 @@ export default {
       isApiOnline,
       loading,
       lazyLoadDaysSlots,
+      buttonLabel,
     };
   },
 };
