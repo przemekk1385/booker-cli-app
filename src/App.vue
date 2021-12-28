@@ -58,9 +58,13 @@ export default {
 </script>
 
 <style>
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  height: 100vh;
+  height: inherit;
   overflow-x: hidden;
   overflow-y: auto;
   background-color: var(--surface-a);
