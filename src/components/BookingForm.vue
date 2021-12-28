@@ -182,6 +182,6 @@ export default {
 }
 
 .p-buttonset .p-button:last-of-type {
-  width: 3rem;
+  width: 2.357rem;
 }
 </style>
