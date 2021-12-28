@@ -1,5 +1,5 @@
-import { ToastSeverity } from "primevue/api";
 import { createStore } from "vuex";
+import { ToastSeverity } from "primevue/api";
 
 import i18n from "@/i18n";
 
