@@ -1,0 +1,38 @@
+module.exports = {
+  pwa: {
+    // workboxPluginMode: "InjectManifest",
+    // workboxOptions: {
+    //   swSrc: "public/service-worker.js",
+    // },
+    themeColor: "#4caf50",
+    msTileColor: "#009900",
+    appleMobileWebAppCapable: "yes",
+    manifestPath: "manifest.webmanifest",
+    manifestOptions: {
+      background_color: "#ffffff",
+      description: "Simple wellness booking app.",
+      id: "/",
+      name: process.env.VUE_APP_NAME,
+      short_name: process.env.VUE_APP_SHORT_NAME,
+      start_url: ".",
+    },
+    iconPaths: {
+      androidChrome192: "img/icons/android-chrome-192x192.png",
+      androidChrome512: "img/icons/android-chrome-512x512.png",
+      appleTouchIcon57: "img/icons/apple-touch-icon-57x57.png",
+      appleTouchIcon60: "img/icons/apple-touch-icon-60x60.png",
+      appleTouchIcon72: "img/icons/apple-touch-icon-72x72.png",
+      appleTouchIcon76: "img/icons/apple-touch-icon-76x76.png",
+      appleTouchIcon114: "img/icons/apple-touch-icon-114x114.png",
+      appleTouchIcon120: "img/icons/apple-touch-icon-120x120.png",
+      appleTouchIcon144: "img/icons/apple-touch-icon-144x144.png",
+      appleTouchIcon152: "img/icons/apple-touch-icon-152x152.png",
+      appleTouchIcon180: "img/icons/apple-touch-icon-180x180.png",
+      appleTouchIcon: "img/icons/apple-touch-icon.png",
+      favicon16: "img/icons/favicon-16x16.png",
+      favicon32: "img/icons/favicon-32x32.png",
+      maskIcon: "img/icons/safari-pinned-tab.svg",
+      msTileImage: "img/icons/msapplication-icon-144x144.png",
+    },
+  },
+};

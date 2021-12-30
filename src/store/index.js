@@ -56,16 +56,6 @@ const mutations = {
 };
 
 const actions = {
-  async initialize({ dispatch, getters }) {
-    await dispatch("fetchHealthStatus");
-
-    await dispatch("fetchSlotsFromDatabase");
-    if (getters.isApiOnline) {
-      await dispatch("fetchSlotsFromApi");
-    }
-
-    // await dispatch("fetchBookingsFromApi");
-  },
   async fetchBookingsFromApi({ commit, dispatch }) {
     commit("bookings", []);
 
@@ -204,13 +194,13 @@ const actions = {
 };
 
 const plugins = [
-  (store) => {
-    store.subscribe(async ({ type, payload }) => {
-      if (type === "slots") {
-        store.dispatch("insertSlotsToDatabase", payload);
-      }
-    });
-  },
+  // (store) => {
+  //   store.subscribe(async ({ type, payload }) => {
+  //     if (type === "slots") {
+  //       store.dispatch("insertSlotsToDatabase", payload);
+  //     }
+  //   });
+  // },
 ];
 
 export default createStore({
