@@ -1,5 +1,9 @@
 module.exports = {
   pwa: {
+    // workboxPluginMode: "InjectManifest",
+    // workboxOptions: {
+    //   swSrc: "public/service-worker.js",
+    // },
     themeColor: "#4caf50",
     msTileColor: "#009900",
     appleMobileWebAppCapable: "yes",
@@ -7,8 +11,8 @@ module.exports = {
     manifestOptions: {
       background_color: "#ffffff",
       description: "Simple wellness booking app.",
+      id: "/",
       name: process.env.VUE_APP_NAME,
-      scope: "/",
       short_name: process.env.VUE_APP_SHORT_NAME,
       start_url: ".",
     },
