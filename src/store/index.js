@@ -56,16 +56,6 @@ const mutations = {
 };
 
 const actions = {
-  async initialize({ dispatch, getters }) {
-    await dispatch("fetchHealthStatus");
-
-    await dispatch("fetchSlotsFromDatabase");
-    if (getters.isApiOnline) {
-      await dispatch("fetchSlotsFromApi");
-    }
-
-    // await dispatch("fetchBookingsFromApi");
-  },
   async fetchBookingsFromApi({ commit, dispatch }) {
     commit("bookings", []);
 

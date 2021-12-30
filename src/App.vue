@@ -26,7 +26,7 @@
 
 <script>
 import { useToast } from "primevue/usetoast";
-import { computed, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 
 import BookingForm from "@/components/BookingForm.vue";
@@ -50,6 +50,23 @@ export default {
         toast.add(message);
       }
     );
+
+    const pooling = ref(undefined);
+    onMounted(async () => {
+      await store.dispatch("fetchHealthStatus");
+      // await store.dispatch("fetchSlotsFromDatabase");
+
+      if (store.getters.isApiOnline) {
+        await store.dispatch("fetchSlotsFromApi");
+      }
+
+      pooling.value = setInterval(async () => {
+        await store.dispatch("fetchHealthStatus");
+      }, 1000 * 60);
+    });
+    onBeforeUnmount(() => {
+      clearInterval(pooling.value);
+    });
 
     initialize();
     return { isApiOnline };
