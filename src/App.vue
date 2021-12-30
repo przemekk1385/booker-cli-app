@@ -39,8 +39,6 @@ export default {
     const store = useStore();
     const toast = useToast();
 
-    const initialize = async () => await store.dispatch("initialize");
-
     const latestMessage = computed(() => store.getters.latestMessage);
     const isApiOnline = computed(() => store.getters.isApiOnline);
 
@@ -68,7 +66,6 @@ export default {
       clearInterval(pooling.value);
     });
 
-    initialize();
     return { isApiOnline };
   },
 };
