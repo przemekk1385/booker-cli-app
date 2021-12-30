@@ -31,6 +31,41 @@ export const getDatabase = () => {
   });
 };
 
+export const slotBatchCreate = async (slots) => {
+  const database = await getDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction("slots", "readwrite");
+    const store = transaction.objectStore("slots");
+
+    slots.forEach((item) => store.put(item));
+
+    transaction.oncomplete = () => {
+      resolve("Item successfully saved.");
+    };
+
+    transaction.onerror = (event) => {
+      reject(event);
+    };
+  });
+};
+
+export const slotClear = async () => {
+  const database = await getDatabase();
+
+  const result = await new Promise((resolve, reject) => {
+    const transaction = database.transaction(["slots"], "readonly");
+    const store = transaction.objectStore("slots");
+
+    store.clear();
+
+    transaction.oncomplete = () => resolve("Ok");
+
+    transaction.onerror = (event) => reject(event);
+  });
+  return result;
+};
+
 export const slotList = async () => {
   const database = await getDatabase();
 
@@ -56,23 +91,4 @@ export const slotList = async () => {
     };
   });
   return slots;
-};
-
-export const slotBatchCreate = async (slots) => {
-  const database = await getDatabase();
-
-  return new Promise((resolve, reject) => {
-    const transaction = database.transaction("slots", "readwrite");
-    const store = transaction.objectStore("slots");
-
-    slots.forEach((item) => store.put(item));
-
-    transaction.oncomplete = () => {
-      resolve("Item successfully saved.");
-    };
-
-    transaction.onerror = (event) => {
-      reject(event);
-    };
-  });
 };
