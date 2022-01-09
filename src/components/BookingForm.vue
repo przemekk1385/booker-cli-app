@@ -1,110 +1,104 @@
 <template>
-  <div class="p-fluid">
-    <form
-      class="p-fluid"
-      @reset="handleReset()"
-      @submit.prevent="handleSubmit()"
-    >
-      <div class="p-field">
-        <span class="p-input-icon-right">
-          <i class="pi pi-hashtag" />
-          <InputText
-            id="code"
-            v-model="v$.code.$model"
-            :class="{
-              'p-invalid': v$.code.$invalid && v$.code.$dirty,
-            }"
-            :placeholder="$t('form.codeInputPlaceholder')"
-            type="text"
-          />
-        </span>
-        <small
-          v-for="error of v$.code.$errors"
-          :key="error.$uid"
-          class="p-d-block p-error"
-        >
-          {{ error.$message }}
-        </small>
-      </div>
-      <div class="p-field">
-        <Calendar
-          inputId="calendar"
-          v-model="v$.day.$model"
-          :class="{ 'p-invalid': v$.day.$invalid && v$.day.$dirty }"
-          :minDate="minDate"
-          :maxDate="maxDate"
-          :showIcon="true"
-        />
-        <small
-          v-for="error of v$.day.$errors"
-          :key="error.$uid"
-          class="p-d-block p-error"
-        >
-          {{ error.$message }}
-        </small>
-      </div>
-      <div class="p-field">
-        <Dropdown
-          inputId="slot"
-          v-model="v$.slot.$model"
-          :class="{ 'p-invalid': v$.slot.$invalid && v$.slot.$dirty }"
-          :disabled="v$.cancel.$model || !isApiOnline"
-          optionDisabled="disabled"
-          optionLabel="label"
-          optionValue="value"
-          :options="daysSlots"
-          :placeholder="$t('form.slotDropdown.placeholder')"
-          @click="lazyLoadDaysSlots()"
-        >
-          <template #option="slotProps">
-            <div v-if="!loading" class="p-ai-center p-jc-between p-d-flex">
-              {{ slotProps.option.label }}
-              <Tag
-                v-if="slotProps.option.apartment"
-                :value="
-                  $t('form.slotDropdown.optionTagValue', {
-                    number: slotProps.option.apartment,
-                  })
-                "
-              ></Tag>
-            </div>
-            <Skeleton
-              v-else
-              :width="slotProps.option.value % 2 ? '75%' : '50%'"
-              height="1rem"
-            />
-          </template>
-        </Dropdown>
-        <small
-          v-for="error of v$.slot.$errors"
-          :key="error.$uid"
-          class="p-d-block p-error"
-        >
-          {{ error.$message }}
-        </small>
-      </div>
-
-      <div class="p-field-checkbox">
-        <Checkbox id="cancel" v-model="v$.cancel.$model" :binary="true" />
-        <label for="cancel">{{ $t("form.cancelCheckboxLabel") }}</label>
-      </div>
-
-      <span class="p-buttonset p-mt-6">
-        <Button
-          class="p-button-primary"
-          :disabled="!isApiOnline"
-          icon="pi pi-send"
-          type="submit"
-          :label="buttonLabel"
-        />
-        <Button
-          class="p-button-outlined p-button-primary"
-          icon="pi pi-times"
-          type="reset"
+  <form class="p-fluid" @reset="handleReset()" @submit.prevent="handleSubmit()">
+    <div class="p-field">
+      <span class="p-input-icon-right">
+        <i class="pi pi-hashtag" />
+        <InputText
+          id="code"
+          v-model="v$.code.$model"
+          :class="{
+            'p-invalid': v$.code.$invalid && v$.code.$dirty,
+          }"
+          :placeholder="$t('form.codeInputPlaceholder')"
+          type="text"
         />
       </span>
-    </form>
-  </div>
+      <small
+        v-for="error of v$.code.$errors"
+        :key="error.$uid"
+        class="p-d-block p-error"
+      >
+        {{ error.$message }}
+      </small>
+    </div>
+    <div class="p-field">
+      <Calendar
+        inputId="calendar"
+        v-model="v$.day.$model"
+        :class="{ 'p-invalid': v$.day.$invalid && v$.day.$dirty }"
+        :minDate="minDate"
+        :maxDate="maxDate"
+        :showIcon="true"
+      />
+      <small
+        v-for="error of v$.day.$errors"
+        :key="error.$uid"
+        class="p-d-block p-error"
+      >
+        {{ error.$message }}
+      </small>
+    </div>
+    <div class="p-field">
+      <Dropdown
+        inputId="slot"
+        v-model="v$.slot.$model"
+        :class="{ 'p-invalid': v$.slot.$invalid && v$.slot.$dirty }"
+        :disabled="v$.cancel.$model || !isApiOnline"
+        optionDisabled="disabled"
+        optionLabel="label"
+        optionValue="value"
+        :options="daysSlots"
+        :placeholder="$t('form.slotDropdown.placeholder')"
+        @click="lazyLoadDaysSlots()"
+      >
+        <template #option="slotProps">
+          <div v-if="!loading" class="p-ai-center p-jc-between p-d-flex">
+            {{ slotProps.option.label }}
+            <Tag
+              v-if="slotProps.option.apartment"
+              :value="
+                $t('form.slotDropdown.optionTagValue', {
+                  number: slotProps.option.apartment,
+                })
+              "
+            ></Tag>
+          </div>
+          <Skeleton
+            v-else
+            :width="slotProps.option.value % 2 ? '75%' : '50%'"
+            height="1rem"
+          />
+        </template>
+      </Dropdown>
+      <small
+        v-for="error of v$.slot.$errors"
+        :key="error.$uid"
+        class="p-d-block p-error"
+      >
+        {{ error.$message }}
+      </small>
+    </div>
+
+    <div class="p-field-checkbox">
+      <Checkbox id="cancel" v-model="v$.cancel.$model" :binary="true" />
+      <label for="cancel">{{ $t("form.cancelCheckboxLabel") }}</label>
+    </div>
+
+    <span class="p-buttonset p-mt-6">
+      <Button
+        class="p-button-primary"
+        :disabled="!isApiOnline"
+        icon="pi pi-send"
+        type="submit"
+        :label="buttonLabel"
+      />
+      <Button
+        class="p-button-outlined p-button-primary"
+        icon="pi pi-times"
+        type="reset"
+      />
+    </span>
+  </form>
 </template>
 
 <script>
