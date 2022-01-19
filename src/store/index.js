@@ -93,7 +93,7 @@ const actions = {
 
     if (errors) {
       const { non_field_errors: nonFieldErrors = [] } = errors;
-      detail = nonFieldErrors[0] || detail;
+      detail = nonFieldErrors || detail;
     }
 
     const statusCodeHandlers = {
