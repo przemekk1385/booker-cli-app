@@ -92,7 +92,7 @@ const actions = {
     let detail = t("store.cancelBooking.formErrorsDetail");
 
     if (errors) {
-      const { non_field_errors: nonFieldErrors = [] } = errors;
+      const { non_field_errors: nonFieldErrors } = errors;
       detail = nonFieldErrors || detail;
     }
 
@@ -124,8 +124,8 @@ const actions = {
     let detail = t("store.createBooking.formErrorsDetail");
 
     if (errors) {
-      const { non_field_errors: nonFieldErrors = [] } = errors;
-      detail = nonFieldErrors[0] || detail;
+      const { non_field_errors: nonFieldErrors } = errors;
+      detail = nonFieldErrors || detail;
     }
 
     const statusCodeHandlers = {
