@@ -62,6 +62,9 @@
                 })
               "
             ></Tag>
+            <span v-else-if="slotProps.option.isOff">{{
+              $t("form.slotDropdown.optionTextValue")
+            }}</span>
           </div>
           <Skeleton
             v-else

@@ -74,7 +74,14 @@ const actions = {
     const { data: slots, status } = await apiSlotList();
 
     if (status === 200) {
-      commit("slots", slots);
+      commit(
+        "slots",
+        slots.map(({ label, value, is_off: isOff }) => ({
+          label,
+          value,
+          isOff,
+        }))
+      );
     } else {
       dispatch("handleFailureNoErrors", {
         detail: t("store.fetchSlotsFromApi.failureDetail"),
