@@ -14,6 +14,7 @@ export default createI18n({
         slotDropdown: {
           placeholder: "Slot",
           optionTagValue: "Apartment",
+          optionTextValue: "Opened to others",
         },
         cancelCheckboxLabel: "Cancel booking",
         cancelButtonLabel: "Cancel",
@@ -60,6 +61,7 @@ export default createI18n({
         slotDropdown: {
           placeholder: "Godzina",
           optionTagValue: "Apartament {number}",
+          optionTextValue: "Otwarte dla pozostałych",
         },
         cancelCheckboxLabel: "Odwołaj rezerwację",
         cancelButtonLabel: "Odwołaj",

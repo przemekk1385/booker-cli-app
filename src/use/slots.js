@@ -29,14 +29,15 @@ export default function useSlots(props) {
   const isTooLate = (hour) => dayjs(lookupDay.value).hour(hour) < dayjs();
 
   const daysSlots = computed(() =>
-    slots.value.map(({ label, value }) => {
+    slots.value.map(({ label, isOff, value }) => {
       const apartment = (daysBookings.value || {})[value];
 
       return {
         label,
         value,
         apartment,
-        disabled: apartment || isTooLate(value),
+        disabled: apartment || isTooLate(value) || isOff,
+        isOff,
       };
     })
   );
